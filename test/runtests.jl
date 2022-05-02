@@ -1,7 +1,6 @@
-# using Test
-# using ASME_Materials
-# using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
-# using WGLMakie
+using Test
+using ASME_Materials
+using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
 using GLMakie, ColorSchemes
 
 """
