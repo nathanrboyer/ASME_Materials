@@ -1,6 +1,5 @@
 # Write to File
 mkpath(outputdir)
-
 XLSX.openxlsx(joinpath(outputdir,outputfile), mode="w") do file
     XLSX.rename!(file[1], "Iso Thermal Conductivity")
     XLSX.writetable!(file[1], conductivity_table)
