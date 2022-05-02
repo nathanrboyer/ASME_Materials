@@ -41,7 +41,7 @@ for i in 1:length(hardening_tables)
 end
 Legend(fig1[1,2], axis1, "Temperature")
 display(fig1)
-save(string(specno,'-',type_grade,'-',class_condition_temper,".png"), fig1)
+save(joinpath(outputdir,string(specno,'-',type_grade,'-',class_condition_temper,".png")), fig1)
 
 # Compare with Michael
 σ_michael_200 = [115000
@@ -138,3 +138,4 @@ scatterlines!(hardening_tables[3]."Plastic Strain (in in^-1)", hardening_tables[
 scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
 Legend(fig2[1,2], axis2, "Author")
 display(fig2)
+save(joinpath(outputdir,"verification.png"), fig2)
