@@ -1,36 +1,43 @@
 # using Test
 # using ASME_Materials
 # using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
-# using Gadfly
 # using WGLMakie
-using GLMakie
+using GLMakie, ColorSchemes
 
-# df = DataFrame(x=[1,2,3])
+"""
+    check_table(table, column, value)
 
-# # Gadfly
-# plot(Guide.xlabel(T), Guide.ylabel("Strength (psi)"),
-#     #layer(x=master_table_raw.T, y=master_table_raw.σ_ys, color=["Raw Yield Strength (psi)"]),
-#     #layer(x=master_table_raw.T, y=master_table_raw.σ_uts, color=["Raw Ultimate Strength (psi)"]),
-#     layer(x=master_table.T, y=master_table.σ_ys, color=["Yield Strength (psi)"]),
-#     layer(x=master_table.T, y=master_table.σ_uts, color=["Ultimate Strength (psi)"])
-# )
+Obtain table row where `column` matches `value`,
+then print the name and value in each column.
+If the cell contains a collection,
+then print the first and last element.
+`table` - DataFrame to check
+`column` - column name as a String or Symbol
+`value` - cell value to look for in the `column` (any type)
+"""
+function check_table(table, column, value)
+    for col in names(table)
+        println("")
+        println(col)
+        data = only(table[table[:, column] .== value, col])
+        if typeof(data) <: AbstractArray
+            println(data[1])
+            println(data[end])
+        else
+            println(data)
+        end
+    end
+end
+check_table(master_table, "T", 200)
 
-# Makie
+# Makie Plots
 fig1 = Figure()
 axis1 = Axis(fig1[1,1], title = "Stress-Strain Curves by Temperature", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
 for i in 1:length(hardening_tables)
-    scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)", hardening_tables[i]."Stress (psi)", label = string(master_table.T[i],"°F"))
+    scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)", hardening_tables[i]."Stress (psi)", label = string(master_table.T[i],"°F"), color=ColorSchemes.vik[i/length(hardening_tables)])
 end
 Legend(fig1[1,2], axis1, "Temperature")
 display(fig1)
-
-fig2 = Figure()
-axis2 = Axis(fig2[1,1], title = "Stress Values by Temperature", xlabel = "Linear Mapping", ylabel = "Stress (psi)")
-for i in 1:length(hardening_tables)
-    scatterlines!(1:length(hardening_tables[i]."Stress (psi)"), hardening_tables[i]."Stress (psi)", label = string(master_table.T[i],"°F"))
-end
-Legend(fig2[1,2], axis2, "Temperature")
-display(fig2)
 
 # Compare with Michael
 σ_michael_200 = [115000
@@ -121,9 +128,9 @@ display(fig2)
 0.088000029
 ]
 
-fig3 = Figure()
-axis3 = Axis(fig3[1,1], title = "SA-723 Grade 3 Class 2 at 200°F", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
+fig2 = Figure()
+axis2 = Axis(fig2[1,1], title = "SA-723 Grade 3 Class 2 at 200°F", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
 scatterlines!(hardening_tables[3]."Plastic Strain (in in^-1)", hardening_tables[3]."Stress (psi)", label = "Nathan")
 scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
-Legend(fig3[1,2], axis3, "Author")
-display(fig3)
+Legend(fig2[1,2], axis2, "Author")
+display(fig2)

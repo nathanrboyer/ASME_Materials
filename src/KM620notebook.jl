@@ -5,7 +5,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ f4747962-bfe6-11ec-1964-eb3e3a043ff2
-using DataFrames, Latexify, Unitful
+using DataFrames, Latexify
 
 # ╔═╡ dcfa5d22-5d07-4012-9afa-0f904216e13c
 @latexrun ϵ_ts(σ_t, E_y, γ_1, γ_2) = σ_t / E_y + γ_1 + γ_2 # KM-620.1
@@ -48,50 +48,54 @@ using DataFrames, Latexify, Unitful
 @latexrun σ_utst(σ_uts, m_2) = σ_uts * exp(m_2) # KM-620.13
 
 # ╔═╡ 02128e2f-640e-4a7b-9786-01c2a83ac9bb
-KM620 = DataFrame("Material" => ["Ferritic steel",
+# Table KM-620 (NOTE: Ferritic steel includes carbon, low alloy, and alloy steels, and ferritic, martensitic, and iron-based age-hardening stainless steels.)
+tableKM620 = DataFrame("Material" => ["Ferritic steel",
                                 "Austenitic stainless steel and nickel-based alloys",
                                 "Duplex stainless steel",
                                 "Precipitation hardening, nickel based",
                                 "Aluminum",
                                 "Copper",
                                 "Titanium and zirconium"],
-                "Maximum Temperature" => [900u"°F",
-                                            900u"°F",
-                                            900u"°F",
-                                            1000u"°F",
-                                            250u"°F",
-                                            150u"°F",
-                                            500u"°F"],
-                "m₂" => [R -> 0.60 * (1.00 - R),
-                        R -> 0.75 * (1.00 - R),
-                        R -> 0.70 * (0.95 - R),
-                        R -> 1.09 * (0.93 - R),
-                        R -> 0.52 * (0.98 - R),
-                        R -> 0.50 * (1.00 - R),
-                        R -> 0.50 * (0.98 - R)],
-                "m₃" => [(E,l) -> 2*log(1+(E*l/100)),
-                        (E,l) -> 3*log(1+(E*l/100)),
-                        (E,l) -> 2*log(1+(E*l/100)),
-                        (E,l) -> 1*log(1+(E*l/100)),
-                        (E,l) -> 1.3*log(1+(E*l/100)),
-                        (E,l) -> 2*log(1+(E*l/100)),
-                        (E,l) -> 1.3*log(1+(E*l/100))],
-                "m₄" => (R,A) -> log(100 / (100 - R*A)),
-                "m₅" => [2.2,
-                        0.6,
-                        2.2,
-                        2.2,
-                        2.2,
-                        2.2,
-                        2.2],
-                "ϵₚ" => [2.0E-5,
-                        2.0E-5,
-                        2.0E-5,
-                        2.0E-5,
-                        5.0E-6,
-                        5.0E-6,
-                        2.0E-5]
-                )
+                        "Maximum Temperature (°F)" => [900,
+                                                900,
+                                                900,
+                                                1000,
+                                                250,
+                                                150,
+                                                500],
+                        "m₂" => [R -> 0.60 * (1.00 - R),
+                                R -> 0.75 * (1.00 - R),
+                                R -> 0.70 * (0.95 - R),
+                                R -> 1.09 * (0.93 - R),
+                                R -> 0.52 * (0.98 - R),
+                                R -> 0.50 * (1.00 - R),
+                                R -> 0.50 * (0.98 - R)],
+                        "m₃" => [(E,l) -> 2*log(1+(E*l/100)),
+                                (E,l) -> 3*log(1+(E*l/100)),
+                                (E,l) -> 2*log(1+(E*l/100)),
+                                (E,l) -> 1*log(1+(E*l/100)),
+                                (E,l) -> 1.3*log(1+(E*l/100)),
+                                (E,l) -> 2*log(1+(E*l/100)),
+                                (E,l) -> 1.3*log(1+(E*l/100))],
+                        "m₄" => (R,A) -> log(100 / (100 - R*A)),
+                        "m₅" => [2.2,
+                                0.6,
+                                2.2,
+                                2.2,
+                                2.2,
+                                2.2,
+                                2.2],
+                        "ϵₚ" => [2.0E-5,
+                                2.0E-5,
+                                2.0E-5,
+                                2.0E-5,
+                                5.0E-6,
+                                5.0E-6,
+                                2.0E-5]
+                        )
+
+# ╔═╡ 17109a6c-f2e9-4057-b514-4e6b0ff2f611
+
 
 # ╔═╡ 8fbd85c1-e7f4-4df5-bfe6-9dc3571a8cf0
 
@@ -101,12 +105,10 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Latexify = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
 DataFrames = "~1.3.3"
-Latexify = "~0.15.14"
-Unitful = "~1.11.0"
+Latexify = "~0.15.15"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -135,21 +137,15 @@ version = "3.43.0"
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 
-[[deps.ConstructionBase]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "f74e9d5388b8620b4cee35d4c5a618dd4dc547f4"
-uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
-version = "1.3.0"
-
 [[deps.Crayons]]
 git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.1.1"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "cc70b17275652eb47bc9e5f81635981f13cea5c8"
+git-tree-sha1 = "fb5f5316dd3fd4c5e7c30a24d50643b73e37cd40"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.9.0"
+version = "1.10.0"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "Future", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrettyTables", "Printf", "REPL", "Reexport", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
@@ -215,9 +211,9 @@ version = "1.3.0"
 
 [[deps.Latexify]]
 deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "Printf", "Requires"]
-git-tree-sha1 = "6f14549f7760d84b2db7a9b10b88cd3cc3025730"
+git-tree-sha1 = "46a39b9c58749eefb5f2dc1178cb8fab5332b1ab"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.15.14"
+version = "0.15.15"
 
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
@@ -289,9 +285,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
-git-tree-sha1 = "28ef6c7ce353f0b35d0df0d5930e0d072c1f5b9b"
+git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.1"
+version = "1.4.2"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -380,12 +376,6 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
 
-[[deps.Unitful]]
-deps = ["ConstructionBase", "Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "b649200e887a487468b71821e2644382699f1b0f"
-uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.11.0"
-
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
@@ -419,6 +409,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╠═a742b814-b96a-4e1b-af9a-6c1f90c0460b
 # ╠═99affa24-db6f-4690-add5-be52b5cd2311
 # ╠═02128e2f-640e-4a7b-9786-01c2a83ac9bb
+# ╠═17109a6c-f2e9-4057-b514-4e6b0ff2f611
 # ╠═8fbd85c1-e7f4-4df5-bfe6-9dc3571a8cf0
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

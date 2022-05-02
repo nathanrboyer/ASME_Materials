@@ -96,6 +96,7 @@ master_table.ϵ_1 = ϵ_1.(master_table.σ_t, master_table.A_1, master_table.m_1)
 master_table.ϵ_2 = ϵ_2.(master_table.σ_t, master_table.A_2, master_table.m_2)
 master_table.γ_1 = γ_1.(master_table.ϵ_1, master_table.H)
 master_table.γ_2 = γ_2.(master_table.ϵ_2, master_table.H)
+master_table.γ_total = master_table.γ_1 .+ master_table.γ_2
 master_table.ϵ_ts = ϵ_ts.(master_table.σ_t, master_table.E_y, master_table.γ_1, master_table.γ_2)
 pretty_table(master_table, nosubheader=true, crop=:horizontal)
 
@@ -105,6 +106,6 @@ temp_table = DataFrame("Temperature (°F)" => master_table.T)
 ## Build Hardening Tables from Master Table
 hardening_tables = [DataFrame() for i in 1:nrow(master_table)]
 for i in 1:nrow(master_table)
-    hardening_tables[i]."Plastic Strain (in in^-1)" = master_table[i,"ϵ_ts"]
+    hardening_tables[i]."Plastic Strain (in in^-1)" = master_table[i,"γ_total"]
     hardening_tables[i]."Stress (psi)" = master_table[i,"σ_t"]
 end

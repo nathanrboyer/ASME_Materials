@@ -17,6 +17,6 @@ XLSX.openxlsx(joinpath(outputdir,outputfile), mode="w") do file
         file[5][1,2*i+2] = " = $(temp_table[i,1])°F"
     end
     for i in 1:nrow(temp_table)
-        XLSX.writetable!(file[5], hardening_tables[i], anchor_cell=XLSX.CellRef(2,2*i+1))
+        #XLSX.writetable!(file[5], hardening_tables[i], anchor_cell=XLSX.CellRef(2,2*i+1)) # Waiting on bug fix in XLSX package.
     end
 end
