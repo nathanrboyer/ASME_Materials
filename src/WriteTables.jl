@@ -12,8 +12,7 @@ XLSX.openxlsx(joinpath(outputdir,outputfile), mode="w") do file
     XLSX.addsheet!(file, "Multilinear Kinematic Hardening")
     XLSX.writetable!(file[5], temp_table)
     for i in 1:nrow(temp_table)
-        file[5][1,3*i] = "Temperature"
-        file[5][1,3*i+1] = " = $(temp_table[i,1])°F"
+        file[5][1,3*i] = "Temperature = $(temp_table[i,1])°F"
         XLSX.writetable!(file[5], hardening_tables[i], anchor_cell=XLSX.CellRef(2,3*i))
     end
 end

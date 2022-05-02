@@ -3,6 +3,7 @@ using ASME_Materials
 using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
 using GLMakie, ColorSchemes
 
+# Check Table Output
 """
     check_table(table, column, value)
 
@@ -29,7 +30,7 @@ function check_table(table, column, value)
 end
 check_table(master_table, "T", 200)
 
-# Makie Plots
+# Stress-Strain Plot
 fig1 = Figure()
 axis1 = Axis(fig1[1,1], title = "Stress-Strain Curves by Temperature", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
 for i in 1:length(hardening_tables)
@@ -42,7 +43,7 @@ Legend(fig1[1,2], axis1, "Temperature")
 display(fig1)
 save(joinpath(outputdir,string(specno,'-',type_grade,'-',class_condition_temper,".png")), fig1)
 
-# Compare with Michael
+# Compare Stress-Strain Data to Michael's
 σ_michael_200 = [115000
 116000
 117000
@@ -138,3 +139,19 @@ scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
 Legend(fig2[1,2], axis2, "Author")
 display(fig2)
 save(joinpath(outputdir,"verification.png"), fig2)
+
+# Show Master Table at Yield Stress
+master_table_yield = DataFrame()
+for col in names(master_table)
+    master_table_yield[:,col] = first.(master_table[:,col])
+end
+pretty_table(master_table_yield, nosubheader=true, crop=:horizontal)
+XLSX.writetable(joinpath(outputdir,"Yield_Data.xlsx"), master_table_yield)
+
+# Show Master Table at Ultimate Stress
+master_table_ultimate = DataFrame()
+for col in names(master_table)
+    master_table_ultimate[:,col] = last.(master_table[:,col])
+end
+pretty_table(master_table_ultimate, nosubheader=true, crop=:horizontal)
+XLSX.writetable(joinpath(outputdir,"Ultimate_Data.xlsx"), master_table_ultimate)
