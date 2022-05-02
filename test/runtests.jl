@@ -34,7 +34,10 @@ check_table(master_table, "T", 200)
 fig1 = Figure()
 axis1 = Axis(fig1[1,1], title = "Stress-Strain Curves by Temperature", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
 for i in 1:length(hardening_tables)
-    scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)", hardening_tables[i]."Stress (psi)", label = string(master_table.T[i],"°F"), color=ColorSchemes.vik[i/length(hardening_tables)])
+    scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)",
+                    hardening_tables[i]."Stress (psi)",
+                    label = string(master_table.T[i],"°F"),
+                    color=ColorSchemes.vik[i/length(hardening_tables)])
 end
 Legend(fig1[1,2], axis1, "Temperature")
 display(fig1)
