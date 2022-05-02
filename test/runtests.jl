@@ -41,6 +41,7 @@ for i in 1:length(hardening_tables)
 end
 Legend(fig1[1,2], axis1, "Temperature")
 display(fig1)
+save(string(specno,'-',type_grade,'-',class_condition_temper,".png"), fig1)
 
 # Compare with Michael
 σ_michael_200 = [115000
