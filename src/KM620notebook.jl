@@ -7,45 +7,120 @@ using InteractiveUtils
 # ╔═╡ f4747962-bfe6-11ec-1964-eb3e3a043ff2
 using DataFrames, Latexify
 
+# ╔═╡ cf6a2f51-7c01-45b9-9c01-630a73d24a5b
+md"""
+This Pluto.jl notebook file is an equivalent alternative to the file `KM620.jl` in the ASME\_Materials package. You may include either file from the `ASME_Materials.jl` file for proper execution.
+
+This file is provided for better visualization of the equations. Follow the instructions [here](https://github.com/fonsp/Pluto.jl#installation) to open this notebook in your web browser.
+"""
+
+# ╔═╡ d299202d-977b-4603-803d-adf2e31ecf87
+md"""
+# Mandatory Appendix 1: Nomenclature
+* ``A =`` <undefined>
+* ``A_1 =`` curve fitting constant for the elastic region of the stress-strain curve (KM-620)
+* ``A_2 =`` curve fitting constant for the plastic region of the stress-strain curve (KM-620)
+* ``E_y =`` modulus of elasticity evaluated at the temperature of interest, see ASME Section II Part D
+* ``H =`` <undefined>
+* ``K =`` <undefined>
+* ``l =`` <undefined>
+* ``m_1 =`` <undefined>
+* ``m_2 =`` <undefined>
+* ``R =`` <undefined>
+* ``γ_1 =`` true strain in the micro-strain region of the stress-strain curve (KM-620)
+* ``γ_2 =`` true strain in the macro-strain region of the stress-strain curve (KM-620)
+* ``ϵ_p =`` stress-strain curve fitting parameter (KM-620)
+* ``ϵ_{ts} =`` true total strain (KM-620)
+* ``ϵ_{ys} =`` 0.2% engineering offset strain (KM-620)
+* ``ϵ_1 =`` true plastic strain in the micro-strain region of the stress-strain curve (KM-620)
+* ``ϵ_2 =`` true plastic strain in the macro-strain region of the stress-strain curve (KM-620)
+* ``σ_t =`` true stress at which the true strain will be evaluated (KM-620)
+* ``σ_{uts} =`` engineering ultimate tensile stress evaluated at the temperature of interest (KM-620)
+* ``σ_{ys} =`` engineering yield stress evaluated at the temperature of interest (KM-620)
+* ``σ_{utst} =`` true ultimate tensile stress evaluated at the true ultimate tensile strain
+"""
+
+# ╔═╡ b21f77f2-bfac-4687-988d-815e061abc63
+md"KM-620.1"
+
 # ╔═╡ dcfa5d22-5d07-4012-9afa-0f904216e13c
 @latexrun ϵ_ts(σ_t, E_y, γ_1, γ_2) = σ_t / E_y + γ_1 + γ_2 # KM-620.1
+
+# ╔═╡ 356c2050-38dd-43a1-a5ad-31999c78f274
+md"KM-620.2"
 
 # ╔═╡ 82845818-9b79-46e8-b74c-661ef5b95c42
 @latexrun γ_1(ϵ_1, H) = ϵ_1 / 2 * (1 - tanh(H)) # KM-620.2
 
+# ╔═╡ af2085b3-70cf-4b67-926d-97e1f68d5640
+md"KM-620.3"
+
 # ╔═╡ 69dcf462-6cf8-478d-8386-7432b5ee26e6
 @latexrun γ_2(ϵ_2, H) = ϵ_2 / 2 * (1 + tanh(H)) # KM-620.3
+
+# ╔═╡ 185c92a0-fdfd-4103-ba58-96b24b8e2cee
+md"KM-620.4"
 
 # ╔═╡ 9d6d926f-c31f-4c51-a218-f337f444d264
 @latexrun ϵ_1(σ_t, A_1, m_1) = (σ_t / A_1)^(1 / m_1) # KM-620.4
 
+# ╔═╡ f32e250b-68c0-4119-8d89-437b08f835f6
+md"KM-620.5"
+
 # ╔═╡ e5682877-4006-4f93-93f1-adcb11350062
 @latexrun A_1(σ_ys, ϵ_ys, m_1) = σ_ys * (1 + ϵ_ys) / (log(1 + ϵ_ys))^m_1 # KM-620.5
+
+# ╔═╡ 0960bd24-588a-4602-a5a2-3ed10d72dc6c
+md"KM-620.6"
 
 # ╔═╡ b7d8375a-b62c-4f87-bb80-5f5172fda25e
 @latexrun m_1(R, ϵ_p, ϵ_ys) = (log(R) + (ϵ_p - ϵ_ys)) / log(log(1+ϵ_p)/log(1+ϵ_ys)) # KM-620.6
 
+# ╔═╡ 213d5ab7-d645-4558-a9d2-5d7b776f241f
+md"KM-620.7"
+
 # ╔═╡ 7449d6ab-605e-4985-8664-d4a38b3683af
 @latexrun ϵ_2(σ_t, A_2, m_2) = (σ_t / A_2)^(1 / m_2) # KM-620.7
 
+# ╔═╡ 7f3f53a4-4fc8-4ee9-a2e6-899f960a432f
+md"KM-620.8"
+
 # ╔═╡ bdbb7aa3-dd44-4245-9142-f625abfc3bc7
 @latexrun A_2(σ_uts, m_2) = (σ_uts * exp(m_2)) / (m_2 ^ m_2) # KM-620.8
+
+# ╔═╡ a140696e-886a-4dcf-95e9-a13023d0b7e5
+md"KM-620.9"
 
 # ╔═╡ 82c036a0-c340-4a01-9966-d1f78abf45f4
 @latexrun H(σ_t, σ_ys, σ_uts, K) = 2 * (σ_t - (σ_ys + K * (σ_uts - σ_ys))) /
 												(K * (σ_uts - σ_ys)) # KM-620.9
 
+# ╔═╡ b3776c83-921c-4d47-bd94-e0e286c2020d
+md"KM-620.10"
+
 # ╔═╡ 64fc6f58-c3f3-488a-a362-19bf48a5b4ae
 @latexrun R(σ_ys, σ_uts) = σ_ys / σ_uts # KM-620.10
+
+# ╔═╡ 546718e7-f69a-4f7b-99f5-ed58335e9729
+md"KM-620.11"
 
 # ╔═╡ dd0d8b1a-2006-4cd4-8c6f-016d27f59b27
 @latexrun ϵ_ys() = 0.002 # KM-620.11
 
+# ╔═╡ a65ee9ac-229a-4bb8-9d35-ccbf3298d2f5
+md"KM-620.12"
+
 # ╔═╡ a742b814-b96a-4e1b-af9a-6c1f90c0460b
 @latexrun K(R) = 1.5*R^1.5 - 0.5*R^2.5 - R^3.5 #KM-620.12
 
+# ╔═╡ 53d42f38-f145-474f-a348-6cbabea51c1d
+md"KM-620.13"
+
 # ╔═╡ 99affa24-db6f-4690-add5-be52b5cd2311
 @latexrun σ_utst(σ_uts, m_2) = σ_uts * exp(m_2) # KM-620.13
+
+# ╔═╡ 3e6200ed-9d39-41f0-93d5-21fa65a9374b
+md"Table KM-620"
 
 # ╔═╡ 02128e2f-640e-4a7b-9786-01c2a83ac9bb
 # Table KM-620 (NOTE: Ferritic steel includes carbon, low alloy, and alloy steels, and ferritic, martensitic, and iron-based age-hardening stainless steels.)
@@ -94,11 +169,10 @@ tableKM620 = DataFrame("Material" => ["Ferritic steel",
                                 2.0E-5]
                         )
 
-# ╔═╡ 17109a6c-f2e9-4057-b514-4e6b0ff2f611
-
-
-# ╔═╡ 8fbd85c1-e7f4-4df5-bfe6-9dc3571a8cf0
-
+# ╔═╡ d5137591-4647-40c2-91ad-fb4a60ece967
+md"""
+**Note:** The `#`'s shown in the table above represent anonymous functions. Check the hidden code for their definitions.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -395,21 +469,36 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 
 # ╔═╡ Cell order:
 # ╠═f4747962-bfe6-11ec-1964-eb3e3a043ff2
-# ╠═dcfa5d22-5d07-4012-9afa-0f904216e13c
-# ╠═82845818-9b79-46e8-b74c-661ef5b95c42
-# ╠═69dcf462-6cf8-478d-8386-7432b5ee26e6
-# ╠═9d6d926f-c31f-4c51-a218-f337f444d264
-# ╠═e5682877-4006-4f93-93f1-adcb11350062
-# ╠═b7d8375a-b62c-4f87-bb80-5f5172fda25e
-# ╠═7449d6ab-605e-4985-8664-d4a38b3683af
-# ╠═bdbb7aa3-dd44-4245-9142-f625abfc3bc7
-# ╠═82c036a0-c340-4a01-9966-d1f78abf45f4
-# ╠═64fc6f58-c3f3-488a-a362-19bf48a5b4ae
-# ╠═dd0d8b1a-2006-4cd4-8c6f-016d27f59b27
-# ╠═a742b814-b96a-4e1b-af9a-6c1f90c0460b
-# ╠═99affa24-db6f-4690-add5-be52b5cd2311
-# ╠═02128e2f-640e-4a7b-9786-01c2a83ac9bb
-# ╠═17109a6c-f2e9-4057-b514-4e6b0ff2f611
-# ╠═8fbd85c1-e7f4-4df5-bfe6-9dc3571a8cf0
+# ╟─cf6a2f51-7c01-45b9-9c01-630a73d24a5b
+# ╟─d299202d-977b-4603-803d-adf2e31ecf87
+# ╟─b21f77f2-bfac-4687-988d-815e061abc63
+# ╟─dcfa5d22-5d07-4012-9afa-0f904216e13c
+# ╟─356c2050-38dd-43a1-a5ad-31999c78f274
+# ╟─82845818-9b79-46e8-b74c-661ef5b95c42
+# ╟─af2085b3-70cf-4b67-926d-97e1f68d5640
+# ╟─69dcf462-6cf8-478d-8386-7432b5ee26e6
+# ╟─185c92a0-fdfd-4103-ba58-96b24b8e2cee
+# ╟─9d6d926f-c31f-4c51-a218-f337f444d264
+# ╟─f32e250b-68c0-4119-8d89-437b08f835f6
+# ╟─e5682877-4006-4f93-93f1-adcb11350062
+# ╟─0960bd24-588a-4602-a5a2-3ed10d72dc6c
+# ╟─b7d8375a-b62c-4f87-bb80-5f5172fda25e
+# ╟─213d5ab7-d645-4558-a9d2-5d7b776f241f
+# ╟─7449d6ab-605e-4985-8664-d4a38b3683af
+# ╟─7f3f53a4-4fc8-4ee9-a2e6-899f960a432f
+# ╟─bdbb7aa3-dd44-4245-9142-f625abfc3bc7
+# ╟─a140696e-886a-4dcf-95e9-a13023d0b7e5
+# ╟─82c036a0-c340-4a01-9966-d1f78abf45f4
+# ╟─b3776c83-921c-4d47-bd94-e0e286c2020d
+# ╟─64fc6f58-c3f3-488a-a362-19bf48a5b4ae
+# ╟─546718e7-f69a-4f7b-99f5-ed58335e9729
+# ╟─dd0d8b1a-2006-4cd4-8c6f-016d27f59b27
+# ╟─a65ee9ac-229a-4bb8-9d35-ccbf3298d2f5
+# ╟─a742b814-b96a-4e1b-af9a-6c1f90c0460b
+# ╟─53d42f38-f145-474f-a348-6cbabea51c1d
+# ╟─99affa24-db6f-4690-add5-be52b5cd2311
+# ╟─3e6200ed-9d39-41f0-93d5-21fa65a9374b
+# ╟─02128e2f-640e-4a7b-9786-01c2a83ac9bb
+# ╟─d5137591-4647-40c2-91ad-fb4a60ece967
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
