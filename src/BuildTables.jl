@@ -34,9 +34,10 @@ function get_row_data(table::DataFrame, conditions::Dict)
 end
 
 # Combine Material Information from Inputs
-material = Dict("Spec. No." => x -> x .== specno,
+material_dict = Dict("Spec. No." => x -> x .== specno,
             "Type/Grade" => x -> x .== type_grade,
             "Class/Condition/Temper" => x -> x .== class_condition_temper)
+material_string = string(specno,'-',type_grade,'-',class_condition_temper)
 
 # Isotropic Thermal Conductivity
 conductivity_table = select(tableTCD, "Temperature (°F)", "TC (Btu/hr-ft-°F)" => ByRow(x -> x / 3600 / 12) => "TC (Btu s^-1 in ^-1 °F^-1)") |> dropmissing
@@ -62,10 +63,10 @@ pretty_table(elasticity_table, nosubheader=true, crop=:horizontal)
 # Multilinear Kinematic Hardening
 ## Yield and Ultimate Strength Data
 yield_temps = get_numeric_headers(tableY)
-yield_data = get_row_data(tableY, material, yield_temps) .* 1000
+yield_data = get_row_data(tableY, material_dict, yield_temps) .* 1000
 yield_table =  DataFrame(T = yield_temps, σ_ys = yield_data) |> dropmissing
 ultimate_temps = get_numeric_headers(tableU)
-ultimate_data = get_row_data(tableU, material, ultimate_temps) .* 1000
+ultimate_data = get_row_data(tableU, material_dict, ultimate_temps) .* 1000
 ultimate_table =  DataFrame(T = ultimate_temps, σ_uts = ultimate_data) |> dropmissing
 
 ## Interpolation
