@@ -17,11 +17,11 @@ using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
 
 # Run Files
 function main()
-    include(joinpath(@__DIR__, "ReadTables.jl"))
-    include(joinpath(@__DIR__, "KM620.jl"))
-    include(joinpath(@__DIR__, "BuildTables.jl"))
-    include(joinpath(@__DIR__, "WriteTables.jl"))
-    include(joinpath(@__DIR__, "PlotTables.jl"))
+    include("ReadTables.jl")
+    include("KM620.jl")
+    include("BuildTables.jl")
+    include("WriteTables.jl")
+    include("PlotTables.jl")
 end
 
 export main, readtable, get_row_data
