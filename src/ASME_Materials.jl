@@ -16,7 +16,7 @@ const outputdir = joinpath("S:/Material Properties/Excel Material Data", AIP_mat
 using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
 
 # Run Files
-function main()
+function process()
     include(joinpath(@__DIR__, "ReadTables.jl"))
     include(joinpath(@__DIR__, "KM620.jl"))
     include(joinpath(@__DIR__, "BuildTables.jl"))
@@ -24,6 +24,6 @@ function main()
     include(joinpath(@__DIR__, "PlotTables.jl"))
 end
 
-export main, readtable, get_row_data
+export process
 
 end # module
