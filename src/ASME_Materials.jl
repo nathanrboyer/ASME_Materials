@@ -17,11 +17,11 @@ using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
 
 # Run Files
 function process()
-    include("ReadTables.jl")
-    include("KM620.jl")
-    include("BuildTables.jl")
-    include("WriteTables.jl")
-    include("PlotTables.jl")
+    include("src/ReadTables.jl")
+    include("src/KM620.jl")
+    include("src/BuildTables.jl")
+    include("src/WriteTables.jl")
+    include("src/PlotTables.jl")
     return master_table
 end
 
