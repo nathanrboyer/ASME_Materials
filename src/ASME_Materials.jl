@@ -22,6 +22,7 @@ function process()
     include("BuildTables.jl")
     include("WriteTables.jl")
     include("PlotTables.jl")
+    return master_table
 end
 
 export process
