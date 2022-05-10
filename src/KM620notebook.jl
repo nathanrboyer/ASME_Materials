@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.0
+# v0.19.3
 
 using Markdown
 using InteractiveUtils
@@ -44,25 +44,25 @@ md"""
 md"KM-620.1"
 
 # ╔═╡ dcfa5d22-5d07-4012-9afa-0f904216e13c
-@latexrun ϵ_ts(σ_t, E_y, γ_1, γ_2) = σ_t / E_y + γ_1 + γ_2 # KM-620.1
+@latexrun ϵ_ts(σ_t, E_y, γ_1, γ_2) = @. σ_t / E_y + γ_1 + γ_2 # KM-620.1
 
 # ╔═╡ 356c2050-38dd-43a1-a5ad-31999c78f274
 md"KM-620.2"
 
 # ╔═╡ 82845818-9b79-46e8-b74c-661ef5b95c42
-@latexrun γ_1(ϵ_1, H) = ϵ_1 / 2 * (1 - tanh(H)) # KM-620.2
+@latexrun γ_1(ϵ_1, H) = @. ϵ_1 / 2 * (1 - tanh(H)) # KM-620.2
 
 # ╔═╡ af2085b3-70cf-4b67-926d-97e1f68d5640
 md"KM-620.3"
 
 # ╔═╡ 69dcf462-6cf8-478d-8386-7432b5ee26e6
-@latexrun γ_2(ϵ_2, H) = ϵ_2 / 2 * (1 + tanh(H)) # KM-620.3
+@latexrun γ_2(ϵ_2, H) = @. ϵ_2 / 2 * (1 + tanh(H)) # KM-620.3
 
 # ╔═╡ 185c92a0-fdfd-4103-ba58-96b24b8e2cee
 md"KM-620.4"
 
 # ╔═╡ 9d6d926f-c31f-4c51-a218-f337f444d264
-@latexrun ϵ_1(σ_t, A_1, m_1) = (σ_t / A_1)^(1 / m_1) # KM-620.4
+@latexrun ϵ_1(σ_t, A_1, m_1) = @. (σ_t / A_1)^(1 / m_1) # KM-620.4
 
 # ╔═╡ f32e250b-68c0-4119-8d89-437b08f835f6
 md"KM-620.5"
@@ -80,7 +80,7 @@ md"KM-620.6"
 md"KM-620.7"
 
 # ╔═╡ 7449d6ab-605e-4985-8664-d4a38b3683af
-@latexrun ϵ_2(σ_t, A_2, m_2) = (σ_t / A_2)^(1 / m_2) # KM-620.7
+@latexrun ϵ_2(σ_t, A_2, m_2) = @. (σ_t / A_2)^(1 / m_2) # KM-620.7
 
 # ╔═╡ 7f3f53a4-4fc8-4ee9-a2e6-899f960a432f
 md"KM-620.8"
@@ -92,7 +92,7 @@ md"KM-620.8"
 md"KM-620.9"
 
 # ╔═╡ 82c036a0-c340-4a01-9966-d1f78abf45f4
-@latexrun H(σ_t, σ_ys, σ_uts, K) = 2 * (σ_t - (σ_ys + K * (σ_uts - σ_ys))) /
+@latexrun H(σ_t, σ_ys, σ_uts, K) = @. 2 * (σ_t - (σ_ys + K * (σ_uts - σ_ys))) /
 												(K * (σ_uts - σ_ys)) # KM-620.9
 
 # ╔═╡ b3776c83-921c-4d47-bd94-e0e286c2020d
