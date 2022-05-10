@@ -1,5 +1,5 @@
 """
-    p1, p2, p3, p4 = plot_ANSYS_tables(tables)
+    fig1, fig2, fig3, fig4 = plot_ANSYS_tables(tables)
 
 Plots ANSYS `tables and saves the figures to `outputdir`.
 """
@@ -39,8 +39,8 @@ function plot_ANSYS_tables(tables)
 
     # Multilinear Kinematic Hardening
     fig4 = Figure()
-    axis4 = Axis(fig4[1,1], title = "Stress-Strain Curves by Temperature", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
-    for (i, temp) in enumerate(tables["Temperature"][:,1])
+    axis4 = Axis(fig4[1,1], title = "Stress-Strain Curves of $material_string", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
+    for temp in tables["Temperature"][:,1]
         scatterlines!(tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)",
                         tables["Hardening $(temp)°F"]."Stress (psi)",
                         label = "$(temp)°F",

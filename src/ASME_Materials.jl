@@ -34,7 +34,7 @@ function main()
     ASME_tables, ASME_groups = read_ASME_tables(inputfilepath)
     ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups)
     write_ANSYS_tables(ANSYS_tables)
-    p1, p2, p3, p4 = plot_ANSYS_tables(ANSYS_tables)
+    plot_ANSYS_tables(ANSYS_tables)
     return ANSYS_tables
 end
 
