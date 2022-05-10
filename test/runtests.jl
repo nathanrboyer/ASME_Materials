@@ -28,7 +28,7 @@ function check_table(table, column, value)
         end
     end
 end
-check_table(master_table, "T", 200)
+check_table(tables["Stress-Strain"], "T", 200)
 
 # Stress-Strain Plot
 fig1 = Figure()
@@ -36,7 +36,7 @@ axis1 = Axis(fig1[1,1], title = "Stress-Strain Curves by Temperature", xlabel = 
 for i in 1:length(hardening_tables)
     scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)",
                     hardening_tables[i]."Stress (psi)",
-                    label = string(master_table.T[i],"°F"),
+                    label = string(tables["Stress-Strain"].T[i],"°F"),
                     color=ColorSchemes.vik[i/length(hardening_tables)])
 end
 Legend(fig1[1,2], axis1, "Temperature")
@@ -142,16 +142,24 @@ save(joinpath(outputdir,"verification.png"), fig2)
 
 # Show Master Table at Yield Stress
 master_table_yield = DataFrame()
-for col in names(master_table)
-    master_table_yield[:,col] = first.(master_table[:,col])
+for col in names(tables["Stress-Strain"])
+    master_table_yield[:,col] = first.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_yield, nosubheader=true, crop=:horizontal)
 XLSX.writetable(joinpath(outputdir,"Yield_Data.xlsx"), master_table_yield)
 
 # Show Master Table at Ultimate Stress
 master_table_ultimate = DataFrame()
-for col in names(master_table)
-    master_table_ultimate[:,col] = last.(master_table[:,col])
+for col in names(tables["Stress-Strain"])
+    master_table_ultimate[:,col] = last.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_ultimate, nosubheader=true, crop=:horizontal)
 XLSX.writetable(joinpath(outputdir,"Ultimate_Data.xlsx"), master_table_ultimate)
+
+
+
+
+pretty_table(tables["Density"], nosubheader=true, crop=:horizontal)
+pretty_table(tables["Thermal Expansion"], nosubheader=true, crop=:horizontal)
+pretty_table(tables["Elasticity"], nosubheader=true, crop=:horizontal)
+pretty_table(tables["Stress-Strain"], nosubheader=true, crop=:horizontal)
