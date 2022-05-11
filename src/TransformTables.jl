@@ -33,11 +33,44 @@ function get_row_data(table::DataFrame, conditions::Dict)
 end
 
 """
-    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, DataFrame})
+    find_true_yield_stress(table::DataFrame)
+
+Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
+"""
+function find_true_yield_stress(table::DataFrame)
+    local I = nrow(table) # Number of discrete temperature points.
+    local σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
+    local σ_ys_true = fill(0.0, I) # Initialize output vector.
+    for i in 1:I
+        local σ_ys_value = table.σ_ys[i]
+        local σ_uts_value = table.σ_uts[i]
+        local K_value = table.K[i]
+        local m_1_value = table.m_1[i]
+        local m_2_value = table.m_2[i]
+        local A_1_value = table.A_1[i]
+        local A_2_value = table.A_2[i]
+        local γ_total_value = 0.0
+        local σ_t_value = 0.0
+        while γ_total_value < plastic_tolerance
+            H_value = H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
+            ϵ_1_value = ϵ_1(σ_t_value, A_1_value, m_1_value)
+            ϵ_2_value = ϵ_2(σ_t_value, A_2_value, m_2_value)
+            γ_1_value = γ_1(ϵ_1_value, H_value)
+            γ_2_value = γ_2(ϵ_2_value, H_value)
+            γ_total_value = γ_1_value + γ_2_value
+            σ_t_value += σ_increment
+        end
+        σ_ys_true[i] = σ_t_value
+    end
+    return σ_ys_true
+end
+
+"""
+    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String})
 
 Create new tables in ANSYS format from the input ASME tables and groups.
 """
-function transform_ASME_tables(ASME_tables, ASME_groups)
+function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String})
     # Create Output Table dictionary
     tables = Dict{String, DataFrame}()
 
@@ -90,9 +123,12 @@ function transform_ASME_tables(ASME_tables, ASME_groups)
     tables["Stress-Strain"].A_1 = A_1.(tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].ϵ_ys, tables["Stress-Strain"].m_1)
     tables["Stress-Strain"].A_2 = A_2.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
     tables["Stress-Strain"].σ_utst = σ_utst.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
-    ### Fix this
-    tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
-    ###
+    if overwrite_yield == true
+        tables["Stress-Strain"].σ_ys_true = find_true_yield_stress(tables["Stress-Strain"])
+        tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys_true[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
+    else
+        tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
+    end
     tables["Stress-Strain"].H = H.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].K)
     tables["Stress-Strain"].ϵ_1 = ϵ_1.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_1, tables["Stress-Strain"].m_1)
     tables["Stress-Strain"].ϵ_2 = ϵ_2.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_2, tables["Stress-Strain"].m_2)
@@ -109,6 +145,7 @@ function transform_ASME_tables(ASME_tables, ASME_groups)
         tables["Hardening $(temp)°F"] = DataFrame()
         tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)" = tables["Stress-Strain"][i,"γ_total"]
         tables["Hardening $(temp)°F"]."Stress (psi)" = tables["Stress-Strain"][i,"σ_t"]
+        tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)"[1] = 0.0 # Artificially move first datapoint to zero strain. (ANSYS Requirement)
     end
 
     return tables

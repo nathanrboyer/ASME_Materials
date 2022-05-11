@@ -3,7 +3,7 @@
 
 Read table from given Excel file and sheet name.
 """
-function readtable(filepath, sheetname)
+function readtable(filepath::String, sheetname::String)
     DataFrame(XLSX.readtable(filepath, sheetname, first_row = 2, infer_eltypes=true)...)
 end
 
@@ -12,7 +12,7 @@ end
 
 Find table group from key table.
 """
-function findgroup(df, value)
+function findgroup(df::DataFrame, value)
     for group in names(df)
         if first(df[:, group]) === missing
             continue
