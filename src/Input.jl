@@ -85,9 +85,10 @@ function get_user_input()
     end
 
     # Files
-    # Convert these to NativeFileDialog.jl once working.
-    global inputfilepath = "S:/Material Properties/Section II-D Tables.xlsx"
-    global outputdir = "S:/Material Properties/Excel Material Data/AIP Q&T Steels"
+    println("\nLocate and select the input file `Section II-D Tables.xlsx`.")
+    global inputfilepath = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
+    println("\nChoose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
+    global outputdir = pick_folder(raw"S:\Material Properties\Excel Material Data")
 
     # Derived Quantities
     global material_string = string(specno,'-',type_grade,'-',class_condition_temper)

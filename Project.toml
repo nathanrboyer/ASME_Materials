@@ -8,6 +8,7 @@ ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+NativeFileDialog = "e1fe445b-aa65-4df4-81c1-2041507f0fd4"
 XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
@@ -15,4 +16,5 @@ ColorSchemes = "3.0"
 DataFrames = "1.0"
 GLMakie = "0.5"
 Interpolations = "0.13"
+NativeFileDialog = "0.2"
 XLSX = "0.7.10"

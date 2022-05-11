@@ -1,7 +1,7 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
 
 # Welcome Message
 @info("""You have just loaded the ASME_Materials package!
@@ -20,10 +20,11 @@ include("PlotTables.jl")
 # Collect Functions Together
 function main()
     user_input = get_user_input()
-    ASME_tables, ASME_groups = read_ASME_tables(inputfilepath)
+    ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
     ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups)
     write_ANSYS_tables(ANSYS_tables)
-    plot_ANSYS_tables(ANSYS_tables)
+    fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables)
+    display(fig4)
     return ANSYS_tables
 end
 
