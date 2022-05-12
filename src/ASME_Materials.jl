@@ -1,13 +1,13 @@
 module ASME_Materials
 
-# Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
-
 # Welcome Message
 @info("""You have just loaded the ASME_Materials package!
 \t Ensure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
 \t Then type `main()` and press Enter.
 """)
+
+# Load Packages
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
 
 # Define Functions
 include("KM620.jl")

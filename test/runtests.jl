@@ -1,7 +1,12 @@
 using Test
 using ASME_Materials
-using DataFrames, Interpolations, Latexify, PrettyTables, XLSX
-using GLMakie, ColorSchemes
+using ColorSchemes, DataFrames, GLMakie, Interpolations, Latexify, NativeFileDialog, PrettyTables, XLSX
+
+user_input = get_user_input()
+ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
+tables = transform_ASME_tables(ASME_tables, ASME_groups)
+write_output = write_ANSYS_tables(tables)
+fig1, fig2, fig3, fig4 = plot_ANSYS_tables(tables)
 
 # Check Table Output
 """
@@ -30,115 +35,108 @@ function check_table(table, column, value)
 end
 check_table(tables["Stress-Strain"], "T", 200)
 
-# Stress-Strain Plot
-fig1 = Figure()
-axis1 = Axis(fig1[1,1], title = "Stress-Strain Curves by Temperature", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
-for i in 1:length(hardening_tables)
-    scatterlines!(hardening_tables[i]."Plastic Strain (in in^-1)",
-                    hardening_tables[i]."Stress (psi)",
-                    label = string(tables["Stress-Strain"].T[i],"°F"),
-                    color=ColorSchemes.vik[i/length(hardening_tables)])
-end
-Legend(fig1[1,2], axis1, "Temperature")
+# Built-In Plots
 display(fig1)
-save(joinpath(outputdir,string(specno,'-',type_grade,'-',class_condition_temper,".png")), fig1)
+display(fig2)
+display(fig3)
+display(fig4)
 
 # Compare Stress-Strain Data to Michael's
-σ_michael_200 = [115000
-116000
-117000
-118000
-119000
-120000
-121000
-121300
-122000
-123000
-124000
-125000
-125800
+σ_michael_200 = [125000
 126000
 127000
 128000
 129000
-129700
 130000
+130300
 131000
 132000
-132900
 133000
 134000
 135000
+135100
 136000
-136184.8
 137000
 138000
 139000
+139300
 140000
 141000
-141730.9
 142000
+142700
 143000
 144000
-144306.8
 145000
+145727
 146000
-146615.7
 147000
-147418.4
+148000
+149000
+150000
+151000
+151704
+152000
+153000
+154000
+154285
+155000
+156000
+156682
+157000
+157511
 ]
 
-ϵ_michael_200 = [0.001848525
-0.002412426
-0.003166029
-0.004172365
-0.005475177
-0.007027458
-0.008645285
-0.009109282
-0.010121002
-0.011398001
-0.012562164
-0.013723228
-0.014700565
-0.014954711
-0.016294928
-0.017762564
-0.01936802
-0.020578097
-0.021119218
-0.02302411
-0.025091593
-0.027099671
-0.027331773
-0.029755972
-0.03237667
-0.035207457
-0.035754738
-0.038262993
-0.041559005
-0.045112292
-0.048940762
-0.053063463
-0.056274472
-0.057500638
-0.062273782
-0.067405697
-0.069055779
-0.072920568
-0.078844024
-0.082706035
-0.085203222
-0.088000029
+ϵ_michael_200 = [0.001936769
+0.002519284
+0.00329659
+0.00432703
+0.005630837
+0.007112586
+0.007560789
+0.008561405
+0.009821935
+0.010913902
+0.01194655
+0.013012404
+0.013123087
+0.014162773
+0.015421618
+0.016800388
+0.018306288
+0.018783822
+0.019945922
+0.021726634
+0.023656903
+0.025102198
+0.025746374
+0.028005793
+0.030446936
+0.032342971
+0.033082564
+0.035926405
+0.038993152
+0.042298492
+0.045859138
+0.049692872
+0.052565796
+0.0538186
+0.058256406
+0.063027614
+0.064451581
+0.068154855
+0.073662138
+0.077649075
+0.079574921
+0.082761556
 ]
 
-fig2 = Figure()
-axis2 = Axis(fig2[1,1], title = "SA-723 Grade 3 Class 2 at 200°F", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
-scatterlines!(hardening_tables[3]."Plastic Strain (in in^-1)", hardening_tables[3]."Stress (psi)", label = "Nathan")
+fig5 = Figure()
+axis5 = Axis(fig5[1,1], title = "SA-723 Grade 3 Class 2a at 200°F", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
+scatterlines!(tables["Hardening 200°F"]."Plastic Strain (in in^-1)", tables["Hardening 200°F"]."Stress (psi)", label = "Nathan")
 scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
-Legend(fig2[1,2], axis2, "Author")
-display(fig2)
-save(joinpath(outputdir,"verification.png"), fig2)
+Legend(fig5[1,2], axis5, "Author")
+display(fig5)
+save(joinpath(user_input.outputdir,"verification.png"), fig5)
 
 # Show Master Table at Yield Stress
 master_table_yield = DataFrame()
@@ -146,7 +144,7 @@ for col in names(tables["Stress-Strain"])
     master_table_yield[:,col] = first.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_yield, nosubheader=true, crop=:horizontal)
-XLSX.writetable(joinpath(outputdir,"Yield_Data.xlsx"), master_table_yield)
+XLSX.writetable(joinpath(user_input.outputdir,"Yield_Data.xlsx"), master_table_yield)
 
 # Show Master Table at Ultimate Stress
 master_table_ultimate = DataFrame()
@@ -154,11 +152,10 @@ for col in names(tables["Stress-Strain"])
     master_table_ultimate[:,col] = last.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_ultimate, nosubheader=true, crop=:horizontal)
-XLSX.writetable(joinpath(outputdir,"Ultimate_Data.xlsx"), master_table_ultimate)
+XLSX.writetable(joinpath(user_input.outputdir,"Ultimate_Data.xlsx"), master_table_ultimate)
 
 
-
-
+# Pretty Print DataFrames
 pretty_table(tables["Density"], nosubheader=true, crop=:horizontal)
 pretty_table(tables["Thermal Expansion"], nosubheader=true, crop=:horizontal)
 pretty_table(tables["Elasticity"], nosubheader=true, crop=:horizontal)
