@@ -40,6 +40,12 @@ function read_ASME_tables(filepath)
     tables["TM"] = readtable(filepath, "Table TM-1")
     tables["PRD"] = readtable(filepath, "Table PRD")
 
+    # Ensure Identifier Columns Contain Only Strings
+    transform!(tables["Y"], "Type/Grade" => ByRow(string), renamecols=false)
+    transform!(tables["Y"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
+    transform!(tables["U"], "Type/Grade" => ByRow(string), renamecols=false)
+    transform!(tables["U"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
+
     # Find Chemical Composition
     nomcomp = only(tables["Y"][
                     (tables["Y"]."Spec. No." .== specno) .&

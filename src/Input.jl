@@ -28,7 +28,7 @@ function get_user_input()
     println("\nSpecification Number (Default: $specno_default)")
     global specno = parse_input(String, specno_default)
 
-    type_grade_default = 3
+    type_grade_default = "3"
     println("\nType/Grade (Default: $type_grade_default)")
     global type_grade = parse_input(String, type_grade_default)
 
