@@ -9,7 +9,7 @@ function __init__()
 end
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
+using ColorSchemes, Crayons, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
 
 # Define Functions
 include("KM620.jl")
@@ -32,7 +32,7 @@ function main()
     fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables)
     display(fig4)
     println("Complete")
-    return ANSYS_tables
+    return ANSYS_tables;
 end
 
 # Make Functions Available

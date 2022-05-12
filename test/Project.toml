@@ -1,6 +1,7 @@
 [deps]
 ASME_Materials = "e596c8da-274e-4954-bc0b-801dea4796a4"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
+Crayons = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
@@ -13,6 +14,7 @@ XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
 
 [compat]
 ColorSchemes = "3.0"
+Crayons = "4.0"
 DataFrames = "1.0"
 GLMakie = "0.5"
 Gadfly = "1.3"
