@@ -19,7 +19,7 @@ include("TransformTables.jl")
 include("WriteTables.jl")
 include("PlotTables.jl")
 
-# Collect Functions Together
+# Full Program
 function main()
     user_input = get_user_input()
 
@@ -49,7 +49,7 @@ function main()
     return ANSYS_tables
 end
 
-# Make Functions Available
-export main, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, plot_ANSYS_tables, find_true_yield_stress, get_user_input
+# Make Functions Available to Use Outside Module
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, plot_ANSYS_tables, find_true_yield_stress
 
 end # module
