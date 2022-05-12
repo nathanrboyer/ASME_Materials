@@ -1,10 +1,12 @@
 module ASME_Materials
 
 # Welcome Message
-@info("""You have just loaded the ASME_Materials package!
-\t Ensure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
-\t Then, once you see the `julia>` prompt, type `main()` and press Enter.
-""")
+function __init__()
+    @info("""You have just loaded the ASME_Materials package!
+    \tEnsure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
+    \tThen type `main()` and press Enter.
+    """)
+end
 
 # Load Packages
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
