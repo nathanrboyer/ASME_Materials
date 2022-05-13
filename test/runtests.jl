@@ -1,6 +1,6 @@
 using Test
 using ASME_Materials
-using ColorSchemes, Crayons, DataFrames, GLMakie, Interpolations, Latexify, NativeFileDialog, PrettyTables, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, Latexify, NativeFileDialog, PrettyTables, Term, XLSX
 
 user_input = get_user_input()
 ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)

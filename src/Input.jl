@@ -22,27 +22,27 @@ Gather user input required to perform the table transformation into a named tupl
 """
 function get_user_input()
     # Material Specification
-    println("Enter the following material information with no special characters or spaces, or press Enter to accept the default value.")
+    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." cyan underline bold)
 
     specno_default = "SA-723"
-    println("\nSpecification Number (Default: $specno_default)")
+    tprint("Specification Number: [dim](Default: $specno_default) [/dim]")
     global specno = parse_input(String, specno_default)
 
     type_grade_default = "3"
-    println("\nType/Grade (Default: $type_grade_default)")
+    tprint("Type/Grade: [dim](Default: $type_grade_default) [/dim]")
     global type_grade = parse_input(String, type_grade_default)
 
     class_condition_temper_default = "2a"
-    println("\nClass/Condition/Temper (Default: $class_condition_temper_default)")
+    tprint("Class/Condition/Temper: [dim](Default: $class_condition_temper_default) [/dim]")
     global class_condition_temper = parse_input(String, class_condition_temper_default)
 
     tableKM620_material_category_number_default = 1
-    println("\nTable KM-620 Material Category (Default: $tableKM620_material_category_number_default)")
-    println("Options:")
+    tprintln(@style "Table KM-620 Options" cyan underline)
     for i in 1:nrow(tableKM620)
-        println("$i: $(tableKM620."Material"[i])")
+        tprintln("[cyan]$i: $(tableKM620."Material"[i])[/cyan]")
     end
-    println("Note: Ferritic steel includes carbon, low alloy, and alloy steels, and ferritic, martensitic, and iron-based age-hardening stainless steels.")
+    tprintln(@style "Note: Ferritic steel includes carbon, low alloy, and alloy steels, and ferritic, martensitic, and iron-based age-hardening stainless steels." italic dim bold)
+    tprint("Table KM-620 Material Category: [dim](Default: $tableKM620_material_category_number_default)[/dim]")
     valid = false
     while valid == false
         try
@@ -50,29 +50,29 @@ function get_user_input()
             global tableKM620_material_category = tableKM620."Material"[tableKM620_material_category_number]
             valid = true
         catch
-            println("Invalid option. Please enter an integer number corresponding to one of the options above.")
+            tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
         end
     end
 
     # Simulation Parameters
-    println("\nEnter the following simulation parameters with no special characters or spaces.")
+    tprintln(@style "\nEnter the following simulation parameters with no special characters or spaces." cyan underline)
 
     num_output_stress_points_default = 50
-    println("\nNumber of Plastic Stress-Strain Points (Default: $num_output_stress_points_default)")
+    tprint("Number of Plastic Stress-Strain Points: [dim](Default: $num_output_stress_points_default) [/dim]")
     global num_output_stress_points = parse_input(Int, num_output_stress_points_default)
 
     overwrite_yield_number_default = 1
-    println("\nHow do you want to calculate the point to consider as zero plastic strain? (Default: $overwrite_yield_number_default)")
-    println("Options:")
-    println("1: Specify my own strain tolerance.")
-    println("2: Use ASME strain tolerance of 0.002 in/in.")
+    tprintln(@style "Plastic Strain Options" cyan underline)
+    tprintln(@style "1: Specify my own strain tolerance." cyan)
+    tprintln(@style "2: Use ASME strain tolerance of 0.002 in/in." cyan)
+    tprint("How do you want to calculate the point to consider as zero plastic strain? [dim](Default: $overwrite_yield_number_default) [/dim]")
     valid = false
     while valid == false
         overwrite_yield_number = parse_input(Int, overwrite_yield_number_default)
         if overwrite_yield_number == 1
             global overwrite_yield = true
             plastic_tolerance_default = 1e-5
-            println("\nPlastic Strain Tolerance to Consider as Zero (Default: $plastic_tolerance_default)")
+            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_tolerance_default) [/dim]")
             global plastic_tolerance = parse_input(Float64, plastic_tolerance_default)
             valid = true
         elseif overwrite_yield_number == 2
@@ -80,14 +80,14 @@ function get_user_input()
             global plastic_tolerance = 0.002
             valid = true
         else
-            println("Invalid option. Please enter an integer number corresponding to one of the options above.")
+            tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
         end
     end
 
     # Files
-    println("\nLocate and select the input file `Section II-D Tables.xlsx`.")
+    println("Locate and select the input file `Section II-D Tables.xlsx`.")
     global inputfilepath = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
-    println("\nChoose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
+    println("Choose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
     global outputdir = pick_folder(raw"S:\Material Properties\Excel Material Data")
 
     # Derived Quantities

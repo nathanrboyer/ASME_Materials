@@ -9,7 +9,7 @@ function __init__()
 end
 
 # Load Packages
-using ColorSchemes, Crayons, DataFrames, GLMakie, Interpolations, NativeFileDialog, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, XLSX
 
 # Define Functions
 include("KM620.jl")
