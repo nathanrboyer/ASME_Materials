@@ -4,7 +4,7 @@
 Writes ANSYS `tables` to an Excel file.
 """
 function write_ANSYS_tables(tables)
-    XLSX.openxlsx(joinpath(outputdir,material_string*".xlsx"), mode="w") do file
+    XLSX.openxlsx(outputfilepath, mode="w") do file
         XLSX.rename!(file[1], "Iso Thermal Conductivity")
         XLSX.writetable!(file[1], tables["Thermal Conductivity"])
         XLSX.addsheet!(file, "Density")
