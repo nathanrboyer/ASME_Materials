@@ -28,8 +28,8 @@ function strain_options()
     vline = vLine(option_numbers, style = "cyan")
     options_panel = Panel(" " * option_numbers * " " * vline * " " * option_text,
                             title = "Plastic Strain Options",
-                            title_style = "cyan bold",
-                            style = "cyan bold",
+                            title_style = "cyan",
+                            style = "cyan",
                             title_justify = :center,
                             fit = true)
     return options_panel
@@ -53,8 +53,8 @@ function tableKM620_options()
                             fit = true)
     options_panel = Panel(" " / (" " * option_numbers * " " * vline * " " * option_text) / " " / note_panel,
                             title = "Table KM-620 Options",
-                            title_style = "cyan bold",
-                            style = "cyan bold",
+                            title_style = "cyan",
+                            style = "cyan",
                             title_justify = :center,
                             fit = true)
     return options_panel

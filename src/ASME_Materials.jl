@@ -18,7 +18,7 @@ include("PlotTables.jl")
 function __init__()
     @info("""You have just loaded the ASME_Materials package!
     \tEnsure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
-    \tThen type `main();` and press Enter.
+    \tThen type `main()` and press Enter.
     """)
 end
 
@@ -58,8 +58,8 @@ function main()
     display(fig4)
     tprintln(@style "Complete\n" cyan italic)
 
-    println(goodbye_message(user_input.outputfilepath))
-    return ANSYS_tables
+    print(goodbye_message(user_input.outputfilepath))
+    return nothing
 end
 
 end # module
