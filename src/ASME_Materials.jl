@@ -1,10 +1,10 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.progress, XLSX
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, plot_ANSYS_tables, find_true_yield_stress
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, plot_ANSYS_tables, find_true_yield_stress, f
 
 # Define Functions
 include("KM620.jl")
@@ -29,11 +29,11 @@ function goodbye_message(outputfilepath)
                             "3. Click the check box next to the appropriate [cyan]Data Source[/cyan] to edit it.\n" *
                             "4. Add and name a new material.\n" *
                             "5. For every sheet in [cyan]$outputfilepath[/cyan]:\n" *
-                                "\ta. Add the property to the new ANSYS material that matches the Excel sheet name.\n" *
-                                "\tb. Copy and paste the Excel sheet data into the matching empty ANSYS table.\n" *
+                            "    a. Add the property to the new ANSYS material that matches the Excel sheet name.\n" *
+                            "    b. Copy and paste the Excel sheet data into the matching empty ANSYS table.\n" *
                             "6. Click the [cyan]Save[/cyan] button next to the [cyan]Data Source[/cyan] checkbox.",
                         title = "ANSYS Workbench Instructions",
-                        title_style = "bold cyan",
+                        title_style = "bold",
                         title_justify = :center,
                         style = "cyan",
                         fit = true)
@@ -44,21 +44,31 @@ end
 function main()
     user_input = get_user_input()
 
-    tprintln(@style "Reading Input File..." cyan italic)
-    ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
+    progressbar = ProgressBar(; columns=:minimal, columns_kwargs = Dict(:SpinnerColumn => Dict(:spinnertype => :circle)))
+    with(progressbar) do
+        readjob = addjob!(progressbar, description = "Reading Input File")
+        start!(readjob)
+        ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
+        stop!(readjob)
 
-    tprintln(@style "Transforming Tables..." cyan italic)
-    ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups)
+        transformjob = addjob!(progressbar, description = "Transforming Tables")
+        start!(transformjob)
+        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups)
+        stop!(transformjob)
 
-    tprintln(@style "Writing Output Tables..." cyan italic)
-    write_ANSYS_tables(ANSYS_tables)
+        writejob = addjob!(progressbar, description = "Writing Output Tables")
+        start!(writejob)
+        write_ANSYS_tables(ANSYS_tables)
+        stop!(writejob)
 
-    tprintln(@style "Plotting Results..." cyan italic)
-    fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables)
-    display(fig4)
-    tprintln(@style "Complete\n" cyan italic)
+        plotjob = addjob!(progressbar, description = "Plotting Results")
+        start!(plotjob)
+        fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables)
+        display(fig4)
+        stop!(plotjob)
+    end
 
-    print(goodbye_message(user_input.outputfilepath))
+    print("\n", goodbye_message(user_input.outputfilepath))
     return nothing
 end
 

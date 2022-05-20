@@ -67,7 +67,7 @@ Gather user input required to perform the table transformation into a named tupl
 """
 function get_user_input()
     # Material Specification
-    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." underline bold cyan)
+    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." underline cyan)
 
     specno_default = "SA-723"
     tprint("Specification Number: [dim](Default: $specno_default) [/dim]")
@@ -96,7 +96,7 @@ function get_user_input()
     end
 
     # Simulation Parameters
-    tprintln(@style "\nEnter the following simulation parameters with no special characters or spaces." underline bold cyan)
+    tprintln(@style "\nEnter the following simulation parameters with no special characters or spaces." underline cyan)
 
     num_output_stress_points_default = 50
     tprint("Number of Plastic Stress-Strain Points: [dim](Default: $num_output_stress_points_default) [/dim]")
@@ -124,7 +124,7 @@ function get_user_input()
     end
 
     # Files
-    tprintln(@style "\nSelect the appropriate file locations below." underline bold cyan)
+    tprintln(@style "\nSelect the appropriate file locations below." underline cyan)
     println("Locate and select the input file `Section II-D Tables.xlsx`.")
     global inputfilepath = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
     println("Choose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
