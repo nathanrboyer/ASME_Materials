@@ -136,6 +136,7 @@ function get_user_input()
                     "Type/Grade" => x -> x .== type_grade,
                     "Class/Condition/Temper" => x -> x .== class_condition_temper)
     global outputfilepath = joinpath(outputdir, material_string*".xlsx")
+    global plotdir = joinpath(outputdir, "Plots")
 
     return (specno = specno,
             type_grade = type_grade,
@@ -147,6 +148,7 @@ function get_user_input()
             inputfilepath = inputfilepath,
             outputfilepath = outputfilepath,
             outputdir = outputdir,
+            plotdir = plotdir,
             material_string = material_string,
             material_dict = material_dict)
 end

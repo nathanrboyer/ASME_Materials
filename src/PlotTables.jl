@@ -4,6 +4,7 @@
 Plots ANSYS `tables and saves the figures to `outputdir`.
 """
 function plot_ANSYS_tables(tables)
+    mkpath(plotdir)
     # Isotropic Thermal Conductivity
     fig1 = Figure()
     axis1 = Axis(fig1[1,1],
@@ -13,7 +14,7 @@ function plot_ANSYS_tables(tables)
     scatterlines!(tables["Thermal Conductivity"]."Temperature (°F)",
                     tables["Thermal Conductivity"]."TC (Btu s^-1 in ^-1 °F^-1)")
     display(fig1)
-    save(joinpath(outputdir,string(material_string,"-ThermalConductivity",".png")), fig1)
+    save(joinpath(plotdir,string(material_string,"-ThermalConductivity",".png")), fig1)
 
     # Isotropic Instantaneous Coefficient of Thermal Expansion
     fig2 = Figure()
@@ -24,7 +25,7 @@ function plot_ANSYS_tables(tables)
     scatterlines!(tables["Thermal Expansion"]."Temperature (°F)",
                     tables["Thermal Expansion"]."Coefficient of Thermal Expansion (°F^-1)")
     display(fig2)
-    save(joinpath(outputdir,string(material_string,"-ThermalExpansion",".png")), fig2)
+    save(joinpath(plotdir,string(material_string,"-ThermalExpansion",".png")), fig2)
 
     # Isotropic Elasticity
     fig3 = Figure()
@@ -35,7 +36,7 @@ function plot_ANSYS_tables(tables)
     scatterlines!(tables["Elasticity"]."Temperature (°F)",
                     tables["Elasticity"]."Young's Modulus (psi)")
     display(fig3)
-    save(joinpath(outputdir,string(material_string,"-Elasticity",".png")), fig3)
+    save(joinpath(plotdir,string(material_string,"-Elasticity",".png")), fig3)
 
     # Multilinear Kinematic Hardening
     fig4 = Figure()
@@ -48,7 +49,7 @@ function plot_ANSYS_tables(tables)
     end
     Legend(fig4[1,2], axis4, "Temperature")
     display(fig4)
-    save(joinpath(outputdir,string(material_string,"-PlasticStrain",".png")), fig4)
+    save(joinpath(plotdir,string(material_string,"-PlasticStrain",".png")), fig4)
 
     return fig1, fig2, fig3, fig4
 end
