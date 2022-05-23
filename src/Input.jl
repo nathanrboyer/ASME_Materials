@@ -138,17 +138,34 @@ function get_user_input()
     global outputfilepath = joinpath(outputdir, material_string*".xlsx")
     global plotdir = joinpath(outputdir, "Plots")
 
-    return (specno = specno,
-            type_grade = type_grade,
-            class_condition_temper = class_condition_temper,
-            tableKM620_material_category = tableKM620_material_category,
-            num_output_stress_points = num_output_stress_points,
-            overwrite_yield = overwrite_yield,
-            plastic_tolerance = plastic_tolerance,
-            inputfilepath = inputfilepath,
-            outputfilepath = outputfilepath,
-            outputdir = outputdir,
-            plotdir = plotdir,
-            material_string = material_string,
-            material_dict = material_dict)
+    return (; specno,
+            type_grade,
+            class_condition_temper,
+            tableKM620_material_category,
+            num_output_stress_points,
+            overwrite_yield,
+            plastic_tolerance,
+            inputfilepath,
+            outputfilepath,
+            outputdir,
+            plotdir,
+            material_string)
+            #material_dict)
+end
+
+"""
+    save_user_input(user_input::NamedTuple)
+
+Saves `user_input` data to the folder specified by `user_input.inputdir`.
+Variable names and values are extracted from `user_input` as (key, value) pairs,
+then written to file one pair per line.
+"""
+function save_user_input(filepath, user_input)
+    mkpath(filepath)
+    filepath = joinpath(filepath, user_input.material_string * ".csv")
+    open(filepath, "w") do io
+        for (key, value) in pairs(user_input)
+            println(io, key, ',', value)
+        end
+    end
 end
