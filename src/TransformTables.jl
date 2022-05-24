@@ -37,7 +37,7 @@ end
 
 Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
 """
-function find_true_yield_stress(table::DataFrame)
+function find_true_yield_stress(table::DataFrame, plastic_strain_tolerance)
     local I = nrow(table) # Number of discrete temperature points.
     local σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
     local σ_ys_true = fill(0.0, I) # Initialize output vector.
@@ -51,7 +51,7 @@ function find_true_yield_stress(table::DataFrame)
         local A_2_value = table.A_2[i]
         local γ_total_value = 0.0
         local σ_t_value = 0.0
-        while γ_total_value < plastic_tolerance
+        while γ_total_value < plastic_strain_tolerance
             H_value = H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
             ϵ_1_value = ϵ_1(σ_t_value, A_1_value, m_1_value)
             ϵ_2_value = ϵ_2(σ_t_value, A_2_value, m_2_value)
@@ -70,7 +70,14 @@ end
 
 Create new tables in ANSYS format from the input ASME tables and groups.
 """
-function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String})
+function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
+    # Unpack Input Tuple
+    material_dict = user_input.material_dict
+    tableKM620_material_category = user_input.tableKM620_material_category
+    num_output_stress_points = user_input.num_output_stress_points
+    overwrite_yield = user_input.overwrite_yield
+    plastic_strain_tolerance = user_input.plastic_strain_tolerance
+
     # Create Output Table dictionary
     tables = Dict{String, DataFrame}()
 
@@ -124,7 +131,7 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
     tables["Stress-Strain"].A_2 = A_2.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
     tables["Stress-Strain"].σ_utst = σ_utst.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
     if overwrite_yield == true
-        tables["Stress-Strain"].σ_ys_true = find_true_yield_stress(tables["Stress-Strain"])
+        tables["Stress-Strain"].σ_ys_true = find_true_yield_stress(tables["Stress-Strain"], plastic_strain_tolerance)
         tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys_true[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
     else
         tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]

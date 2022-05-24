@@ -69,26 +69,27 @@ function get_user_input()
     # Material Specification
     tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." underline cyan)
 
-    specno_default = "SA-723"
-    tprint("Specification Number: [dim](Default: $specno_default) [/dim]")
-    global specno = parse_input(String, specno_default)
+    spec_no_default = "SA-723"
+    tprint("Specification Number: [dim](Default: $spec_no_default) [/dim]")
+    spec_no = parse_input(String, spec_no_default)
 
     type_grade_default = "3"
     tprint("Type/Grade: [dim](Default: $type_grade_default) [/dim]")
-    global type_grade = parse_input(String, type_grade_default)
+    type_grade = parse_input(String, type_grade_default)
 
     class_condition_temper_default = "2a"
     tprint("Class/Condition/Temper: [dim](Default: $class_condition_temper_default) [/dim]")
-    global class_condition_temper = parse_input(String, class_condition_temper_default)
+    class_condition_temper = parse_input(String, class_condition_temper_default)
 
     tableKM620_material_category_number_default = 1
     tprint(tableKM620_options())
     tprint("Table KM-620 Material Category: [dim](Default: $tableKM620_material_category_number_default)[/dim]")
     valid = false
+    local tableKM620_material_category_number, tableKM620_material_category
     while valid == false
         try
             tableKM620_material_category_number = parse_input(Int, tableKM620_material_category_number_default)
-            global tableKM620_material_category = tableKM620."Material"[tableKM620_material_category_number]
+            tableKM620_material_category = tableKM620."Material"[tableKM620_material_category_number]
             valid = true
         catch
             tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
@@ -100,23 +101,24 @@ function get_user_input()
 
     num_output_stress_points_default = 50
     tprint("Number of Plastic Stress-Strain Points: [dim](Default: $num_output_stress_points_default) [/dim]")
-    global num_output_stress_points = parse_input(Int, num_output_stress_points_default)
+    num_output_stress_points = parse_input(Int, num_output_stress_points_default)
 
     overwrite_yield_number_default = 1
     tprint(strain_options())
     tprint("How do you want to calculate the point to consider as zero plastic strain? [dim](Default: $overwrite_yield_number_default) [/dim]")
     valid = false
+    local overwrite_yield_number, overwrite_yield, plastic_strain_tolerance_default, plastic_strain_tolerance
     while valid == false
         overwrite_yield_number = parse_input(Int, overwrite_yield_number_default)
         if overwrite_yield_number == 1
-            global overwrite_yield = true
-            plastic_tolerance_default = 1e-5
-            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_tolerance_default) [/dim]")
-            global plastic_tolerance = parse_input(Float64, plastic_tolerance_default)
+            overwrite_yield = true
+            plastic_strain_tolerance_default = 1e-5
+            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
+            plastic_strain_tolerance = parse_input(Float64, plastic_strain_tolerance_default)
             valid = true
         elseif overwrite_yield_number == 2
-            global overwrite_yield = false
-            global plastic_tolerance = 0.002
+            overwrite_yield = false
+            plastic_strain_tolerance = 0.002
             valid = true
         else
             tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
@@ -126,31 +128,33 @@ function get_user_input()
     # Files
     tprintln(@style "\nSelect the appropriate file locations below." underline cyan)
     println("Locate and select the input file `Section II-D Tables.xlsx`.")
-    global inputfilepath = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
+    input_file_path = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
     println("Choose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
-    global outputdir = pick_folder(raw"S:\Material Properties\Excel Material Data")
+    output_folder = pick_folder(raw"S:\Material Properties\Excel Material Data")
 
     # Derived Quantities
-    global material_string = string(specno,'-',type_grade,'-',class_condition_temper)
-    global material_dict = Dict("Spec. No." => x -> x .== specno,
-                    "Type/Grade" => x -> x .== type_grade,
-                    "Class/Condition/Temper" => x -> x .== class_condition_temper)
-    global outputfilepath = joinpath(outputdir, material_string*".xlsx")
-    global plotdir = joinpath(outputdir, "Plots")
+    material_string = string(spec_no,'-',type_grade,'-',class_condition_temper)
+    material_dict = Dict("Spec. No." => x -> x .== spec_no,
+                        "Type/Grade" => x -> x .== type_grade,
+                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    output_file_path = joinpath(output_folder, material_string*".xlsx")
+    plot_folder = joinpath(output_folder, "Plots")
 
-    return (; specno,
-            type_grade,
-            class_condition_temper,
-            tableKM620_material_category,
-            num_output_stress_points,
-            overwrite_yield,
-            plastic_tolerance,
-            inputfilepath,
-            outputfilepath,
-            outputdir,
-            plotdir,
-            material_string)
-            #material_dict)
+    user_input = (; spec_no,
+                    type_grade,
+                    class_condition_temper,
+                    tableKM620_material_category,
+                    num_output_stress_points,
+                    overwrite_yield,
+                    plastic_strain_tolerance,
+                    input_file_path,
+                    output_file_path,
+                    output_folder,
+                    plot_folder,
+                    material_string,
+                    material_dict)
+
+    return user_input
 end
 
 """

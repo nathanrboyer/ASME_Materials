@@ -23,12 +23,12 @@ function __init__()
 end
 
 # Goodbye Message
-function goodbye_message(outputfilepath)
+function goodbye_message(output_file_path)
     goodbye_panel = Panel("1. Open [cyan]Engineering Data[/cyan] in [cyan]ANSYS Workbench[/cyan].\n" *
                             "2. Click on [cyan]Engineering Data Sources[/cyan].\n" *
                             "3. Click the check box next to the appropriate [cyan]Data Source[/cyan] to edit it.\n" *
                             "4. Add and name a new material.\n" *
-                            "5. For every sheet in [cyan]$outputfilepath[/cyan]:\n" *
+                            "5. For every sheet in [cyan]$output_file_path[/cyan]:\n" *
                             "    a. Add the property to the new ANSYS material that matches the Excel sheet name.\n" *
                             "    b. Copy and paste the Excel sheet data into the matching empty ANSYS table.\n" *
                             "6. Click the [cyan]Save[/cyan] button next to the [cyan]Data Source[/cyan] checkbox.",
@@ -48,27 +48,27 @@ function main()
     with(progressbar) do
         readjob = addjob!(progressbar, description = "Reading Input File")
         start!(readjob)
-        ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
+        ASME_tables, ASME_groups = read_ASME_tables(user_input)
         stop!(readjob)
 
         transformjob = addjob!(progressbar, description = "Transforming Tables")
         start!(transformjob)
-        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups)
+        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
         stop!(transformjob)
 
         writejob = addjob!(progressbar, description = "Writing Output Tables")
         start!(writejob)
-        write_ANSYS_tables(ANSYS_tables)
+        write_ANSYS_tables(ANSYS_tables, user_input)
         stop!(writejob)
 
         plotjob = addjob!(progressbar, description = "Plotting Results")
         start!(plotjob)
-        fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables)
+        fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables, user_input)
         display(fig4)
         stop!(plotjob)
     end
 
-    print("\n", goodbye_message(user_input.outputfilepath))
+    print("\n", goodbye_message(user_input.output_file_path))
     return nothing
 end
 

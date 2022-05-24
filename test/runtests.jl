@@ -3,7 +3,7 @@ using ASME_Materials
 using ColorSchemes, DataFrames, GLMakie, Interpolations, Latexify, NativeFileDialog, PrettyTables, Term, XLSX
 
 user_input = get_user_input()
-ASME_tables, ASME_groups = read_ASME_tables(user_input.inputfilepath)
+ASME_tables, ASME_groups = read_ASME_tables(user_input.input_file_path)
 tables = transform_ASME_tables(ASME_tables, ASME_groups)
 write_output = write_ANSYS_tables(tables)
 fig1, fig2, fig3, fig4 = plot_ANSYS_tables(tables)
@@ -136,7 +136,7 @@ scatterlines!(tables["Hardening 200°F"]."Plastic Strain (in in^-1)", tables["Ha
 scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
 Legend(fig5[1,2], axis5, "Author")
 display(fig5)
-save(joinpath(user_input.outputdir,"verification.png"), fig5)
+save(joinpath(user_input.output_folder,"verification.png"), fig5)
 
 # Show Master Table at Yield Stress
 master_table_yield = DataFrame()
@@ -144,7 +144,7 @@ for col in names(tables["Stress-Strain"])
     master_table_yield[:,col] = first.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_yield, nosubheader=true, crop=:horizontal)
-XLSX.writetable(joinpath(user_input.outputdir,"Yield_Data.xlsx"), master_table_yield)
+XLSX.writetable(joinpath(user_input.output_folder,"Yield_Data.xlsx"), master_table_yield)
 
 # Show Master Table at Ultimate Stress
 master_table_ultimate = DataFrame()
@@ -152,7 +152,7 @@ for col in names(tables["Stress-Strain"])
     master_table_ultimate[:,col] = last.(tables["Stress-Strain"][:,col])
 end
 pretty_table(master_table_ultimate, nosubheader=true, crop=:horizontal)
-XLSX.writetable(joinpath(user_input.outputdir,"Ultimate_Data.xlsx"), master_table_ultimate)
+XLSX.writetable(joinpath(user_input.output_folder,"Ultimate_Data.xlsx"), master_table_ultimate)
 
 
 # Pretty Print DataFrames

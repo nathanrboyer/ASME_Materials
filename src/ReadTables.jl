@@ -28,7 +28,11 @@ end
 
 Make a dictionary of tables read from sheets in the input Excel file.
 """
-function read_ASME_tables(filepath)
+function read_ASME_tables(user_input)
+    # Unpack Input Tuple
+    filepath = user_input.input_file_path
+    material_dict = user_input.material_dict
+
     # Read Independent Tables
     tables = Dict{String, DataFrame}()
     tables["Y"] = readtable(filepath, "Table Y-1")
@@ -47,12 +51,7 @@ function read_ASME_tables(filepath)
     transform!(tables["U"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
 
     # Find Chemical Composition
-    nomcomp = only(tables["Y"][
-                    (tables["Y"]."Spec. No." .== specno) .&
-                    (tables["Y"]."Type/Grade" .== type_grade) .&
-                    (tables["Y"]."Class/Condition/Temper" .== class_condition_temper)
-                    , "Nominal Composition"])
-
+    nomcomp = subset(tables["Y"], material_dict...)."Nominal Composition" |> only
     groups = Dict{String, String}()
     groups["TM"] = findgroup(tables["TMkey"], nomcomp)
     groups["PRD"] = findgroup(tables["PRDkey"], nomcomp)
