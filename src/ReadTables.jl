@@ -24,14 +24,12 @@ function findgroup(df::DataFrame, value)
 end
 
 """
-    ASME_tables, ASME_groups = read_ASME_tables(filepath::String)
+    ASME_tables, ASME_groups = read_ASME_tables(filepath::String, material_dict::Dict)
 
-Make a dictionary of tables read from sheets in the input Excel file.
+Make a dictionary of tables and groups read from sheets in the input Excel file located at `filepath`
+using `material_dict` to filter the resulting DataFrame to the selected material.
 """
-function read_ASME_tables(user_input)
-    # Unpack Input Tuple
-    filepath = user_input.input_file_path
-    material_dict = user_input.material_dict
+function read_ASME_tables(filepath::String, material_dict::Dict)
 
     # Read Independent Tables
     tables = Dict{String, DataFrame}()
@@ -63,4 +61,43 @@ function read_ASME_tables(user_input)
     tables["TCD"] = readtable(filepath, "Table TCD - " * groups["TCD"])
 
     return tables, groups
+end
+
+"""
+    ASME_tables, ASME_groups = read_ASME_tables(user_input::NamedTuple)
+
+Make a dictionary of tables and groups read from the `user_input` information.
+Fieldnames `input_file_path` and `material_dict` are required to be in `user_input`.
+"""
+function read_ASME_tables(user_input::NamedTuple)
+    filepath = user_input.input_file_path
+    material_dict = user_input.material_dict
+    read_ASME_tables(filepath::String, material_dict::Dict)
+end
+
+"""
+    ASME_tables, ASME_groups = read_ASME_tables(filepath, spec_no, type_grade, class_condition_temper)
+
+Make a dictionary of tables and groups read from from sheets in the input Excel file located at `filepath`.
+`spec_no`, `type_grade`, and `class_condition_temper` define the material information to retrieve from the file.
+"""
+function read_ASME_tables(filepath, spec_no, type_grade, class_condition_temper)
+    material_dict = Dict("Spec. No." => x -> x .== spec_no,
+                        "Type/Grade" => x -> x .== type_grade,
+                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    read_ASME_tables(filepath::String, material_dict::Dict)
+end
+
+"""
+    ASME_tables, ASME_groups = read_ASME_tables(; filepath, spec_no, type_grade, class_condition_temper, _...)
+
+Make a dictionary of tables and groups read from from sheets in the input Excel file located at `filepath`.
+`spec_no`, `type_grade`, and `class_condition_temper` define the material information to retrieve from the file.
+"""
+function read_ASME_tables(; input_file_path, spec_no, type_grade, class_condition_temper, _...)
+    filepath = input_file_path
+    material_dict = Dict("Spec. No." => x -> x .== spec_no,
+                        "Type/Grade" => x -> x .== type_grade,
+                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    read_ASME_tables(filepath::String, material_dict::Dict)
 end

@@ -4,7 +4,7 @@ module ASME_Materials
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.progress, XLSX
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, f
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress
 
 # Define Functions
 include("KM620.jl")
@@ -42,18 +42,18 @@ end
 
 # Full Program
 function main()
-    user_input = get_user_input()
+    global user_input = get_user_input()
 
     progressbar = ProgressBar(; columns=:minimal, columns_kwargs = Dict(:SpinnerColumn => Dict(:spinnertype => :circle)))
     with(progressbar) do
         readjob = addjob!(progressbar, description = "Reading Input File")
         start!(readjob)
-        ASME_tables, ASME_groups = read_ASME_tables(user_input)
+        global ASME_tables, ASME_groups = read_ASME_tables(user_input)
         stop!(readjob)
 
         transformjob = addjob!(progressbar, description = "Transforming Tables")
         start!(transformjob)
-        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
+        global ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
         stop!(transformjob)
 
         writejob = addjob!(progressbar, description = "Writing Output Tables")
@@ -63,7 +63,7 @@ function main()
 
         plotjob = addjob!(progressbar, description = "Plotting Results")
         start!(plotjob)
-        fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables, user_input)
+        global fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables, user_input)
         display(fig4)
         stop!(plotjob)
     end

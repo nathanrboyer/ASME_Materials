@@ -152,7 +152,7 @@ function get_user_input()
                     output_folder,
                     plot_folder,
                     material_string,
-                    material_dict)
+                    material_dict) # NamedTuple collection of all user inputs
 
     return user_input
 end
