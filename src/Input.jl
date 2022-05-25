@@ -21,8 +21,8 @@ end
 Returns a terminal panel with the plastic strain calculation options. Call `print` or `println` on the result to diplay it.
 """
 function strain_options()
-    option_text = RenderableText("Specify my own strain tolerance.\n" *
-                                "Use ASME strain tolerance of 0.002 in/in.",
+    option_text = RenderableText("Specify my own plastic strain tolerance.\n" *
+                                "Use ASME plastic strain tolerance of 0.002 in/in.",
                                 style = "dim")
     option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
     vline = vLine(option_numbers, style = "cyan")
@@ -113,7 +113,7 @@ function get_user_input()
         if overwrite_yield_number == 1
             overwrite_yield = true
             plastic_strain_tolerance_default = 1e-5
-            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
+            tprint("Plastic Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
             plastic_strain_tolerance = parse_input(Float64, plastic_strain_tolerance_default)
             valid = true
         elseif overwrite_yield_number == 2
