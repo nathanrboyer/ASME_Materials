@@ -66,17 +66,30 @@ function find_true_yield_stress(table::DataFrame, plastic_strain_tolerance)
 end
 
 """
-    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String})
+    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
+                                                                    material_dict::Dict,
+                                                                    tableKM620_material_category::String,
+                                                                    num_output_stress_points::Int,
+                                                                    overwrite_yield::Bool,
+                                                                    plastic_strain_tolerance::Float64, _...)
 
-Create new tables in ANSYS format from the input ASME tables and groups.
+Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`.
+
+# Keyword Arguments (Required)
+- `material_dict::Dict`: Dictionary for material DataFrame filtering. Call make_material_dict(spec_no, type_grade, class_condition_temper) to make.
+- `tableKM620_material_category::String`: Material Category from Section VIII Division 3 Table KM-620.
+- `num_output_stress_points::Int`: Number of evenly-spaced stress-strain points to compute on curve between yield and ultimate stress.
+- `overwrite_yield::Bool`: True/False whether to compute a new yield stress using a plastic strain tolerance different from the default 0.002 in/in.
+- `plastic_strain_tolerance::Float64`: Value of plastic strain to consider as zero plastic strain.
+
 """
-function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
-    # Unpack Input Tuple
-    material_dict = user_input.material_dict
-    tableKM620_material_category = user_input.tableKM620_material_category
-    num_output_stress_points = user_input.num_output_stress_points
-    overwrite_yield = user_input.overwrite_yield
-    plastic_strain_tolerance = user_input.plastic_strain_tolerance
+function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
+                                material_dict::Dict,
+                                tableKM620_material_category::String,
+                                num_output_stress_points::Int,
+                                overwrite_yield::Bool,
+                                plastic_strain_tolerance::Float64,
+                                _...) # _... picks up any extra arguments
 
     # Create Output Table dictionary
     tables = Dict{String, DataFrame}()
@@ -156,4 +169,13 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
     end
 
     return tables
+end
+
+"""
+    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
+
+Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and `user_input`.
+"""
+function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
+    transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}; user_input...) # Splat user_input into keyword arguments.
 end

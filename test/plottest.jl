@@ -1,28 +1,3 @@
-"""
-    check_table(table, column, value)
-
-Obtain table row where `column` matches `value`,
-then print the name and value in each column.
-If the cell contains a collection,
-then print the first and last element.
-`table` - DataFrame to check
-`column` - column name as a String or Symbol
-`value` - cell value to look for in the `column` (any type)
-"""
-function check_table(table, column, value)
-    for col in names(table)
-        println("")
-        println(col)
-        data = only(table[table[:, column] .== value, col])
-        if typeof(data) <: AbstractArray
-            println(data[1])
-            println(data[end])
-        else
-            println(data)
-        end
-    end
-end
-
 user_input = (spec_no = "SA-723",
                 type_grade = "3",
                 class_condition_temper = "2a",
@@ -40,7 +15,12 @@ user_input = (spec_no = "SA-723",
                                     "Class/Condition/Temper" => x -> x .== "2a"))
 ASME_tables, ASME_groups = read_ASME_tables(user_input)
 ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
-ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups; user_input...)
 
+fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
+fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)
+fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input.material_string)
 
-check_table(ANSYS_tables["Stress-Strain"], "T", 200)
+display(fig_tc)
+display(fig_te)
+display(fig_ym)
+display(fig_ps)

@@ -61,6 +61,20 @@ function tableKM620_options()
 end
 
 """
+    material_dict::Dict{String, Function} = make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
+
+Create dictionary to filter DataFrame material properties from material specifications.
+
+Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
+"""
+function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
+    material_dict = Dict("Spec. No." => x -> x .== spec_no,
+                        "Type/Grade" => x -> x .== type_grade,
+                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    return material_dict
+end
+
+"""
     get_user_input()
 
 Gather user input required to perform the table transformation into a named tuple .
@@ -134,9 +148,7 @@ function get_user_input()
 
     # Derived Quantities
     material_string = string(spec_no,'-',type_grade,'-',class_condition_temper)
-    material_dict = Dict("Spec. No." => x -> x .== spec_no,
-                        "Type/Grade" => x -> x .== type_grade,
-                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    material_dict = make_material_dict(spec_no, type_grade, class_condition_temper)
     output_file_path = joinpath(output_folder, material_string*".xlsx")
     plot_folder = joinpath(output_folder, "Plots")
 

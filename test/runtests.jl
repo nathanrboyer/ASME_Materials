@@ -4,4 +4,6 @@ using ColorSchemes, DataFrames, GLMakie, Interpolations, Latexify, NativeFileDia
 
 include("readtest.jl")
 include("transformtest.jl")
+include("writetest.jl")
+include("plottest.jl")
 include("verification.jl")

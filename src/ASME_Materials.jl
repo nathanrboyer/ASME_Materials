@@ -4,7 +4,7 @@ module ASME_Materials
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.progress, XLSX
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict
 
 # Define Functions
 include("KM620.jl")
@@ -63,8 +63,8 @@ function main()
 
         plotjob = addjob!(progressbar, description = "Plotting Results")
         start!(plotjob)
-        global fig1, fig2, fig3, fig4 = plot_ANSYS_tables(ANSYS_tables, user_input)
-        display(fig4)
+        global fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
+        display(fig_ps)
         stop!(plotjob)
     end
 

@@ -12,13 +12,38 @@ function make_info_table(; plastic_strain_tolerance, num_output_stress_points, t
 end
 
 """
-    write_ANSYS_tables(tables::Dict{String, DataFrame})
+    write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
 
 Writes ANSYS `tables` to an Excel file.
+Path to output Excel file (including file name) is specified by `filepath`.
 """
-function write_ANSYS_tables(tables, user_input::NamedTuple)
-    filepath = user_input.output_file_path
+function write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
     XLSX.openxlsx(filepath, mode="w") do file
+        XLSX.rename!(file[1], "Iso Thermal Conductivity")
+        XLSX.writetable!(file[1], tables["Thermal Conductivity"])
+        XLSX.addsheet!(file, "Density")
+        XLSX.writetable!(file[2], tables["Density"])
+        XLSX.addsheet!(file, "Iso Inst Coef Thermal Expansion")
+        XLSX.writetable!(file[3], tables["Thermal Expansion"])
+        XLSX.addsheet!(file, "Isotropic Elasticity")
+        XLSX.writetable!(file[4], tables["Elasticity"])
+        XLSX.addsheet!(file, "Multilinear Kinematic Hardening")
+        XLSX.writetable!(file[5], tables["Temperature"])
+        for (i, temp) in enumerate(tables["Temperature"][:,1])
+            file[5][1,3*i] = "Temperature = $(temp)°F"
+            XLSX.writetable!(file[5], tables["Hardening $(temp)°F"], anchor_cell=XLSX.CellRef(2,3*i))
+        end
+    end
+end
+
+"""
+    write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)
+
+Writes ANSYS `tables` to an Excel file using information specified in `user_input`.
+`output_file_path`, `plastic_strain_tolerance`, `num_output_stress_points`, and `tableKM620_material_category` must be present in `user_input`.
+"""
+function write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)
+    XLSX.openxlsx(user_input.output_file_path, mode="w") do file
         XLSX.rename!(file[1], "Iso Thermal Conductivity")
         XLSX.writetable!(file[1], tables["Thermal Conductivity"])
         XLSX.addsheet!(file, "Density")
