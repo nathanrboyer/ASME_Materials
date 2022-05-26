@@ -129,7 +129,7 @@ function get_user_input()
         if overwrite_yield_number == 1
             overwrite_yield = true
             plastic_strain_tolerance_default = 1e-5
-            tprint("Plastic Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
+            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
             plastic_strain_tolerance = parse_input(Float64, plastic_strain_tolerance_default)
             valid = true
         elseif overwrite_yield_number == 2
