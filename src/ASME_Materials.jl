@@ -18,7 +18,7 @@ include("PlotTables.jl")
 function __init__()
     @info("""You have just loaded the ASME_Materials package!
     \tEnsure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
-    \tThen type `main()` and press Enter.
+    \tThen type `main();` and press Enter.
     """)
 end
 
@@ -40,20 +40,32 @@ function goodbye_message(output_file_path)
     return goodbye_panel
 end
 
+# Output Struct
+struct ASME_Materials_Data
+    user_input
+    ASME_tables
+    ASME_groups
+    ANSYS_tables
+    fig_tc
+    fig_te
+    fig_ym
+    fig_ps
+end
+
 # Full Program
 function main()
-    global user_input = get_user_input()
+    user_input = get_user_input()
 
     progressbar = ProgressBar(; columns=:minimal, columns_kwargs = Dict(:SpinnerColumn => Dict(:spinnertype => :circle)))
-    with(progressbar) do
+    output = with(progressbar) do
         readjob = addjob!(progressbar, description = "Reading Input File")
         start!(readjob)
-        global ASME_tables, ASME_groups = read_ASME_tables(user_input)
+        ASME_tables, ASME_groups = read_ASME_tables(user_input)
         stop!(readjob)
 
         transformjob = addjob!(progressbar, description = "Transforming Tables")
         start!(transformjob)
-        global ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
+        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
         stop!(transformjob)
 
         writejob = addjob!(progressbar, description = "Writing Output Tables")
@@ -63,13 +75,15 @@ function main()
 
         plotjob = addjob!(progressbar, description = "Plotting Results")
         start!(plotjob)
-        global fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
+        fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
         display(fig_ps)
         stop!(plotjob)
+
+        ASME_Materials_Data(user_input, ASME_tables, ASME_groups, ANSYS_tables, fig_tc, fig_te, fig_ym, fig_ps)
     end
 
     print("\n", goodbye_message(user_input.output_file_path))
-    return nothing
+    return output
 end
 
 end # module
