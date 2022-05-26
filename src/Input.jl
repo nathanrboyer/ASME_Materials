@@ -81,7 +81,8 @@ Gather user input required to perform the table transformation into a named tupl
 """
 function get_user_input()
     # Material Specification
-    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." underline cyan)
+    tprintln(@style "Material Information" underline cyan)
+    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." dim)
 
     spec_no_default = "SA-723"
     tprint("Specification Number: [dim](Default: $spec_no_default) [/dim]")
@@ -111,7 +112,8 @@ function get_user_input()
     end
 
     # Simulation Parameters
-    tprintln(@style "\nEnter the following simulation parameters with no special characters or spaces." underline cyan)
+    tprintln(@style "\nSimulation Parameters" underline cyan)
+    tprintln(@style "Enter the following simulation parameters with no special characters or spaces, or press Enter to accept the default value." dim)
 
     num_output_stress_points_default = 50
     tprint("Number of Plastic Stress-Strain Points: [dim](Default: $num_output_stress_points_default) [/dim]")
