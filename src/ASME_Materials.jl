@@ -4,7 +4,7 @@ module ASME_Materials
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.progress, XLSX
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict, goodbye_message
 
 # Define Functions
 include("KM620.jl")
@@ -18,7 +18,7 @@ include("PlotTables.jl")
 function __init__()
     @info("""You have just loaded the ASME_Materials package!
     \tEnsure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
-    \tThen type `main();` and press Enter.
+    \tThen type `main()` and press Enter.
     """)
 end
 
@@ -51,6 +51,7 @@ struct ASME_Materials_Data
     fig_ym
     fig_ps
 end
+Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "[dim]   Output Fields: $(join(fieldnames(typeof(x)),", "))[/dim]")
 
 # Full Program
 function main()
