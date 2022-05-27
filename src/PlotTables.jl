@@ -47,7 +47,10 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
 
     # Multilinear Kinematic Hardening
     fig4 = Figure()
-    axis4 = Axis(fig4[1,1], title = "Stress-Strain Curves of $material_string", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
+    axis4 = Axis(fig4[1,1],
+                title = "Stress-Strain Curves of $material_string",
+                xlabel = "Plastic Strain (in in^-1)",
+                ylabel = "Stress (psi)")
     for temp in tables["Temperature"][:,1]
         scatterlines!(tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)",
                         tables["Hardening $(temp)°F"]."Stress (psi)",
