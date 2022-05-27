@@ -38,19 +38,19 @@ end
 Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
 """
 function find_true_yield_stress(table::DataFrame, plastic_strain_tolerance)
-    local I = nrow(table) # Number of discrete temperature points.
-    local σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
-    local σ_ys_true = fill(0.0, I) # Initialize output vector.
+    I = nrow(table) # Number of discrete temperature points.
+    σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
+    σ_ys_true = fill(0.0, I) # Initialize output vector.
     for i in 1:I
-        local σ_ys_value = table.σ_ys[i]
-        local σ_uts_value = table.σ_uts[i]
-        local K_value = table.K[i]
-        local m_1_value = table.m_1[i]
-        local m_2_value = table.m_2[i]
-        local A_1_value = table.A_1[i]
-        local A_2_value = table.A_2[i]
-        local γ_total_value = 0.0
-        local σ_t_value = 0.0
+        σ_ys_value = table.σ_ys[i]
+        σ_uts_value = table.σ_uts[i]
+        K_value = table.K[i]
+        m_1_value = table.m_1[i]
+        m_2_value = table.m_2[i]
+        A_1_value = table.A_1[i]
+        A_2_value = table.A_2[i]
+        γ_total_value = 0.0
+        σ_t_value = 0.0
         while γ_total_value < plastic_strain_tolerance
             H_value = H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
             ϵ_1_value = ϵ_1(σ_t_value, A_1_value, m_1_value)
