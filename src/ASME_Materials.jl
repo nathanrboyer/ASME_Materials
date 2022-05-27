@@ -54,9 +54,7 @@ end
 Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "[dim]   Output Fields: $(join(fieldnames(typeof(x)),", "))[/dim]")
 
 # Full Program
-function main()
-    user_input = get_user_input()
-
+function main(user_input::NamedTuple)
     progressbar = ProgressBar(; columns=:minimal, columns_kwargs = Dict(:SpinnerColumn => Dict(:spinnertype => :circle)))
     output = with(progressbar) do
         readjob = addjob!(progressbar, description = "Reading Input File")
@@ -86,5 +84,6 @@ function main()
     print("\n", goodbye_message(user_input.output_file_path))
     return output
 end
+main() = main(get_user_input())
 
 end # module
