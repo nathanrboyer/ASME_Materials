@@ -77,7 +77,7 @@ end
 """
     get_user_input()
 
-Gather user input required to perform the table transformation into a named tuple .
+Gather user input required to perform the table transformation into a named tuple.
 """
 function get_user_input()
     # Material Specification

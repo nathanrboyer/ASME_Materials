@@ -17,7 +17,7 @@ function get_numeric_headers(table::DataFrame)
 end
 
 """
-    row_data::Vector = get_row_data(table::DataFrame, conditions::Dict, [returncolumns])
+    row_data::Vector = get_row_data(table::DataFrame, conditions::Dict[, returncolumns])
 
 Returns the `table` row that meets all the provided `conditions`.
 `conditions` is a `Dict` which maps column names to filtering functions
