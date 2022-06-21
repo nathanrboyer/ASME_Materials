@@ -1,7 +1,7 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.Progress, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, XLSX
 
 # Export Function Names
 export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_sleep_stress, make_material_dict, goodbye_message
@@ -55,38 +55,22 @@ Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "{dim
 
 # Full Program
 function main(user_input::NamedTuple)
-    progressbar = ProgressBar(; columns=:minimal, columns_kwargs = Dict(:SpinnerColumn => Dict(:spinnertype => :circle)))
-    output = with(progressbar) do
-        readjob = addjob!(progressbar, description = "Reading Input File")
-        start!(readjob)
-        sleep(0.001)
-        ASME_tables, ASME_groups = read_ASME_tables(user_input)
-        stop!(readjob)
+    tprintln(@style "Reading input file ..." cyan italic)
+    ASME_tables, ASME_groups = read_ASME_tables(user_input)
 
-        transformjob = addjob!(progressbar, description = "Transforming Tables")
-        start!(transformjob)
-        sleep(0.001)
-        ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
-        stop!(transformjob)
+    tprintln(@style "Transforming input tables ..." cyan italic)
+    ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
-        writejob = addjob!(progressbar, description = "Writing Output Tables")
-        start!(writejob)
-        sleep(0.001)
-        write_ANSYS_tables(ANSYS_tables, user_input)
-        stop!(writejob)
+    tprintln(@style "Writing output tables ..." cyan italic)
+    write_ANSYS_tables(ANSYS_tables, user_input)
 
-        plotjob = addjob!(progressbar, description = "Plotting Results")
-        start!(plotjob)
-        sleep(0.001)
-        fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
-        display(fig_ps)
-        stop!(plotjob)
-
-        ASME_Materials_Data(user_input, ASME_tables, ASME_groups, ANSYS_tables, fig_tc, fig_te, fig_ym, fig_ps)
-    end
+    tprintln(@style "Plotting results ..." cyan italic)
+    fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
+    display(fig_ps)
 
     print("\n", goodbye_message(user_input.output_file_path))
-    return output
+
+    return ASME_Materials_Data(user_input, ASME_tables, ASME_groups, ANSYS_tables, fig_tc, fig_te, fig_ym, fig_ps)
 end
 main() = main(get_user_input())
 
