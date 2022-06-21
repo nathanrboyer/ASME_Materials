@@ -55,7 +55,7 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
         scatterlines!(tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)",
                         tables["Hardening $(temp)°F"]."Stress (psi)",
                         label = "$(temp)°F",
-                        color=ColorSchemes.vik[temp/tables["Temperature"][end,1]])
+                        color=ColorSchemes.rainbow[temp/tables["Temperature"][end,1]])
     end
     Legend(fig4[1,2], axis4, "Temperature")
     display(fig4)
