@@ -16,47 +16,44 @@ function parse_input(type, default)
 end
 
 """
-    strain_options()
-
-Returns a terminal panel with the plastic strain calculation options. Call `print` or `println` on the result to diplay it.
-"""
-function strain_options()
-    option_text = RenderableText("Specify my own plastic strain tolerance.\n" *
-                                "Use ASME plastic strain tolerance of 0.002 in/in.",
-                                style = "dim")
-    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
-    vline = vLine(option_numbers, style = "cyan")
-    options_panel = Panel(" " * option_numbers * " " * vline * " " * option_text,
-                            title = "Plastic Strain Options",
-                            title_style = "cyan",
-                            style = "cyan",
-                            title_justify = :center,
-                            fit = true)
-    return options_panel
-end
-
-"""
     tableKM620_options()
 
 Returns a terminal panel with the material information from Table KM-620. Call `print` or `println` on the result to diplay it.
 """
 function tableKM620_options()
     option_text = RenderableText(join(tableKM620."Material", "\n"), style = "dim")
+    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
+    vline = vLine(option_numbers, style = "cyan")
     note_text = RenderableText("Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
                                 "and ferritic, martensitic, and iron-based age-hardening stainless steels."
                                 , style = "dim")
+    note_panel = Panel(note_text,
+                        title = "Note",
+                        style = "cyan")
+    top_text = TextBox(option_numbers * " " * vline * " " * option_text,
+                        padding = (2, 0, 0, 0))
+    options_panel = Panel(top_text / note_panel,
+                        title = "Table KM-620 Material Categories",
+                        style = "cyan")
+    return options_panel
+end
+
+"""
+    yield_options()
+
+Returns a terminal panel with the yield strain calculation options. Call `print` or `println` on the result to diplay it.
+"""
+function yield_options()
+    option_text = RenderableText("Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
+                                "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
+                                "Specify my own proportional limit tolerance at yield.",
+                                style = "dim")
     option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
     vline = vLine(option_numbers, style = "cyan")
-    note_panel = Panel(note_text,
-                            title = "Note",
+    options_panel = Panel(option_numbers * " " * vline * " " * option_text,
+                            title = "Yield Point Calculation Options",
                             style = "cyan",
-                            fit = true)
-    options_panel = Panel(" " / (" " * option_numbers * " " * vline * " " * option_text) / " " / note_panel,
-                            title = "Table KM-620 Options",
-                            title_style = "cyan",
-                            style = "cyan",
-                            title_justify = :center,
-                            fit = true)
+                            padding = (5, 5, 1, 1))
     return options_panel
 end
 
@@ -85,20 +82,20 @@ function get_user_input()
     tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." dim)
 
     spec_no_default = "SA-723"
-    tprint("Specification Number: [dim](Default: $spec_no_default) [/dim]")
+    tprint("Specification Number: {dim}(Default: $spec_no_default) {/dim}", highlight=false)
     spec_no = parse_input(String, spec_no_default)
 
     type_grade_default = "3"
-    tprint("Type/Grade: [dim](Default: $type_grade_default) [/dim]")
+    tprint("Type/Grade: {dim}(Default: $type_grade_default) {/dim}", highlight=false)
     type_grade = parse_input(String, type_grade_default)
 
     class_condition_temper_default = "2a"
-    tprint("Class/Condition/Temper: [dim](Default: $class_condition_temper_default) [/dim]")
+    tprint("Class/Condition/Temper: {dim}(Default: $class_condition_temper_default) {/dim}", highlight=false)
     class_condition_temper = parse_input(String, class_condition_temper_default)
 
     tableKM620_material_category_number_default = 1
     tprint(tableKM620_options())
-    tprint("Table KM-620 Material Category: [dim](Default: $tableKM620_material_category_number_default)[/dim]")
+    tprint("Table KM-620 Material Category: {dim}(Default: $tableKM620_material_category_number_default) {/dim}", highlight=false)
     valid = false
     local tableKM620_material_category_number, tableKM620_material_category
     while valid == false
@@ -115,31 +112,35 @@ function get_user_input()
     tprintln(@style "\nSimulation Parameters" underline cyan)
     tprintln(@style "Enter the following simulation parameters with no special characters or spaces, or press Enter to accept the default value." dim)
 
-    num_output_stress_points_default = 50
-    tprint("Number of Plastic Stress-Strain Points: [dim](Default: $num_output_stress_points_default) [/dim]")
-    num_output_stress_points = parse_input(Int, num_output_stress_points_default)
-
-    overwrite_yield_number_default = 1
-    tprint(strain_options())
-    tprint("How do you want to calculate the point to consider as zero plastic strain? [dim](Default: $overwrite_yield_number_default) [/dim]")
+    yield_option_default = 1
+    tprint(yield_options())
+    tprint("Yield Point Calculation Option: {dim}(Default: $yield_option_default) {/dim}", highlight=false)
     valid = false
-    local overwrite_yield_number, overwrite_yield, plastic_strain_tolerance_default, plastic_strain_tolerance
+    local yield_option, overwrite_yield, proportional_limit_default, proportional_limit
     while valid == false
-        overwrite_yield_number = parse_input(Int, overwrite_yield_number_default)
-        if overwrite_yield_number == 1
+        yield_option = parse_input(Int, yield_option_default)
+        if yield_option == 1
             overwrite_yield = true
-            plastic_strain_tolerance_default = 1e-5
-            tprint("Plastic Strain Tolerance to Consider as Zero: [dim](Default: $plastic_strain_tolerance_default) [/dim]")
-            plastic_strain_tolerance = parse_input(Float64, plastic_strain_tolerance_default)
+            proportional_limit = tableKM620[yield_option, "ϵₚ"]
             valid = true
-        elseif overwrite_yield_number == 2
+        elseif yield_option == 2
             overwrite_yield = false
-            plastic_strain_tolerance = 0.002
+            proportional_limit = 0.002
+            valid = true
+        elseif yield_option == 3
+            overwrite_yield = true
+            proportional_limit_default = 1E-6
+            tprint("Proportional Limit Tolerance: {dim}(Default: $proportional_limit_default) {/dim}", highlight=false)
+            proportional_limit = parse_input(Float64, proportional_limit_default)
             valid = true
         else
             tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
         end
     end
+
+    num_output_stress_points_default = 50
+    tprint("Number of Plastic Stress-Strain Points: {dim}(Default: $num_output_stress_points_default) {/dim}", highlight=false)
+    num_output_stress_points = parse_input(Int, num_output_stress_points_default)
 
     # Files
     tprintln(@style "\nSelect the appropriate file locations below." underline cyan)
@@ -160,7 +161,7 @@ function get_user_input()
                     tableKM620_material_category,
                     num_output_stress_points,
                     overwrite_yield,
-                    plastic_strain_tolerance,
+                    proportional_limit,
                     input_file_path,
                     output_file_path,
                     output_folder,

@@ -6,7 +6,7 @@ user_input1 = (spec_no = "SA-723",
                 tableKM620_material_category = "Ferritic steel",
                 num_output_stress_points = 50,
                 overwrite_yield = true,
-                plastic_strain_tolerance = 1.0e-5,
+                proportional_limit = 1.0e-5,
                 input_file_path = "S:\\Material Properties\\Section II-D Tables.xlsx",
                 output_file_path = "S:\\Material Properties\\Excel Material Data\\AIP Q&T Steels\\SA-723-3-2a.xlsx",
                 output_folder = "S:\\Material Properties\\Excel Material Data\\AIP Q&T Steels",
@@ -22,7 +22,7 @@ user_input2 = (spec_no = "SA-723",
                 tableKM620_material_category = "Ferritic steel",
                 num_output_stress_points = 50,
                 overwrite_yield = false,
-                plastic_strain_tolerance = 2.0e-3,
+                proportional_limit = 2.0e-3,
                 input_file_path = "S:\\Material Properties\\Section II-D Tables.xlsx",
                 output_file_path = "S:\\Material Properties\\Excel Material Data\\AIP Q&T Steels\\SA-723-3-2a.xlsx",
                 output_folder = "S:\\Material Properties\\Excel Material Data\\AIP Q&T Steels",
@@ -69,6 +69,6 @@ axis = Axis(fig[1,1],
             ylabel = "Stress (ksi)")
 scatterlines!(ϵ1[1:ϵlast1], σ1[1:ϵlast1]./1000, label = "1E-5 in/in")
 scatterlines!(ϵ2, σ2./1000, label = "2E-3 in/in")
-leg = Legend(fig[1,2], axis, "Plastic Strain Tolerance")
+leg = Legend(fig[1,2], axis, "Proportional Limit")
 save("Stress-Strain Transition Region.png", fig)
 display(fig)

@@ -1,10 +1,10 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.progress, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, Term.Progress, XLSX
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict, goodbye_message
+export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_sleep_stress, make_material_dict, goodbye_message
 
 # Define Functions
 include("KM620.jl")
@@ -24,14 +24,14 @@ end
 
 # Goodbye Message
 function goodbye_message(output_file_path)
-    goodbye_panel = Panel("1. Open [cyan]Engineering Data[/cyan] in [cyan]ANSYS Workbench[/cyan].\n" *
-                            "2. Click on [cyan]Engineering Data Sources[/cyan].\n" *
-                            "3. Click the check box next to the appropriate [cyan]Data Source[/cyan] to edit it.\n" *
+    goodbye_panel = Panel("1. Open {cyan}Engineering Data{/cyan} in {cyan}ANSYS Workbench{/cyan}.\n" *
+                            "2. Click on {cyan}Engineering Data Sources{/cyan}.\n" *
+                            "3. Click the check box next to the appropriate {cyan}Data Source{/cyan} to edit it.\n" *
                             "4. Add and name a new material.\n" *
-                            "5. For every sheet in [cyan]$output_file_path[/cyan]:\n" *
+                            "5. For every sheet in {cyan}$output_file_path{/cyan}:\n" *
                             "    a. Add the property to the new ANSYS material that matches the Excel sheet name.\n" *
                             "    b. Copy and paste the Excel sheet data into the matching empty ANSYS table.\n" *
-                            "6. Click the [cyan]Save[/cyan] button next to the [cyan]Data Source[/cyan] checkbox.",
+                            "6. Click the {cyan}Save{/cyan} button next to the {cyan}Data Source{/cyan} checkbox.",
                         title = "ANSYS Workbench Instructions",
                         title_style = "bold",
                         title_justify = :center,
@@ -51,7 +51,7 @@ struct ASME_Materials_Data
     fig_ym
     fig_ps
 end
-Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "[dim]   Output Fields: $(join(fieldnames(typeof(x)),", "))[/dim]")
+Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "{dim}   Output Fields: $(join(fieldnames(typeof(x)),", ")){/dim}")
 
 # Full Program
 function main(user_input::NamedTuple)
@@ -59,21 +59,25 @@ function main(user_input::NamedTuple)
     output = with(progressbar) do
         readjob = addjob!(progressbar, description = "Reading Input File")
         start!(readjob)
+        sleep(0.001)
         ASME_tables, ASME_groups = read_ASME_tables(user_input)
         stop!(readjob)
 
         transformjob = addjob!(progressbar, description = "Transforming Tables")
         start!(transformjob)
+        sleep(0.001)
         ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
         stop!(transformjob)
 
         writejob = addjob!(progressbar, description = "Writing Output Tables")
         start!(writejob)
+        sleep(0.001)
         write_ANSYS_tables(ANSYS_tables, user_input)
         stop!(writejob)
 
         plotjob = addjob!(progressbar, description = "Plotting Results")
         start!(plotjob)
+        sleep(0.001)
         fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
         display(fig_ps)
         stop!(plotjob)
