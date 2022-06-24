@@ -7,6 +7,7 @@ using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term,
 export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_sleep_stress, make_material_dict, goodbye_message
 
 # Define Functions
+include("KM610.jl")
 include("KM620.jl")
 include("Input.jl")
 include("ReadTables.jl")
