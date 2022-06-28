@@ -33,12 +33,10 @@ function write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
         end
         XLSX.addsheet!(file, "Iso Thermal Conductivity")
         XLSX.writetable!(file[5], tables["Thermal Conductivity"])
-        XLSX.addsheet!(file, "Bilinear K Hardening - EPP")
-        file[6]["A1"] = "To create a pure Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the existing hardening model with the data below."
-        XLSX.writetable!(file[6], tables["EPP"], anchor_cell=XLSX.CellRef("A3"))
-        XLSX.addsheet!(file, "Multi K Hardening - EPP Stable")
-        file[7]["A1"] = "To create a stabilized Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the existing hardening model with the data below."
-        XLSX.writetable!(file[7], tables["EPP Stable"], anchor_cell=XLSX.CellRef("A3"))
+        XLSX.addsheet!(file, "Perfectly Plastic Hardening")
+        file[6]["A1"] = "To create an Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the Multilinear Kinematic Hardening data with the data below."
+        file[6]["A2"] = "Use only the first datapoint at each temperature for a pure EPP material. Use both datapoints at each temperature for a stabilized EPP material. Stabilization is the maximum amount allowed by KM-610."
+        XLSX.writetable!(file[6], tables["EPP"], anchor_cell=XLSX.CellRef("A4"))
     end
 end
 
@@ -64,14 +62,13 @@ function write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTu
         end
         XLSX.addsheet!(file, "Iso Thermal Conductivity")
         XLSX.writetable!(file[5], tables["Thermal Conductivity"])
-        XLSX.addsheet!(file, "Bilinear K Hardening - EPP")
-        file[6]["A1"] = "To create a pure Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the existing hardening model with the data below."
-        XLSX.writetable!(file[6], tables["EPP"], anchor_cell=XLSX.CellRef("A3"))
-        XLSX.addsheet!(file, "Multi K Hardening - EPP Stable")
-        file[7]["A1"] = "To create a stabilized Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the existing hardening model with the data below."
-        XLSX.writetable!(file[7], tables["EPP Stable"], anchor_cell=XLSX.CellRef("A3"))
+        XLSX.addsheet!(file, "Perfectly Plastic Hardening")
+        file[6]["A1"] = "To create an Elastic Perfectly-Plastic (EPP) material model, duplicate the material and replace the Multilinear Kinematic Hardening data with the data below."
+        file[6]["A2"] = "Use only the first datapoint at each temperature for a pure EPP material. Use both datapoints at each temperature for a stabilized EPP material. Stabilization is the maximum amount allowed by KM-610."
+        XLSX.writetable!(file[6], tables["EPP"], anchor_cell=XLSX.CellRef("A4"))
         XLSX.addsheet!(file, "Input Information")
-        file[8]["A1"] = "The input values below were used to generate the tables in this workbook. Do not enter this table into ANSYS. It is provided for informational purposes."
-        XLSX.writetable!(file[8], make_info_table(; user_input...), anchor_cell=XLSX.CellRef("A3"))
+        file[7]["A1"] = "Do not enter this table into ANSYS. It is provided for informational purposes."
+        file[7]["A2"] = "The input values below were used to generate the tables in this workbook."
+        XLSX.writetable!(file[7], make_info_table(; user_input...), anchor_cell=XLSX.CellRef("A4"))
     end
 end

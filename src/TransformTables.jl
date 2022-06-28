@@ -168,29 +168,20 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
     # Isotropic Thermal Conductivity
     tables["Thermal Conductivity"] = select(ASME_tables["TCD"], "Temperature (°F)", "TC (Btu/hr-ft-°F)" => ByRow(x -> x / 3600 / 12) => "TC (Btu s^-1 in ^-1 °F^-1)") |> dropmissing
 
-    # Bilinear Kinematic Hardening - Elastic Perfectly Plastic
-    tables["EPP"] = copy(yield_table)
-    tables["EPP"].E_t = zeros(nrow(yield_table))
-    rename!(tables["EPP"],
-            :T => "Temperature (°F)",
-            :σ_ys => "Yield Strength (psi)",
-            :E_t => "Tangent Modulus (psi)")
-
-    # Multilinear Kinematic Hardening - Elastic Perfectly Plastic Stabilized
-        ## Trilinear material model with nearly perfectly plastic hardening.
-        ## Slopes are (E_y, E_t, 0).
-        ## Maximum stabilization allowed by ASME BPVC.VIII.3 KM-610 is used.
-    tables["EPP Stable"] = DataFrame("Temperature (°F)" => Vector{Union{Int, Missing}}(missing, 3*nrow(yield_table)),
+    # Elastic Perfectly Plastic Multilinear Kinematic Hardening
+        ## Trilinear material model with nearly perfectly plastic hardening. Maximum stabilization allowed by ASME BPVC.VIII.3 KM-610 is used.
+        ## Slopes are (E_y, E_t, 0). The second datapont can be deleted to implement a true perfectly plastic material.
+    tables["EPP"] = DataFrame("Temperature (°F)" => Vector{Union{Int, Missing}}(missing, 3*nrow(yield_table)),
                                      "Plastic Strain (in in^-1)" => Vector{Union{Float64, Missing}}(missing, 3*nrow(yield_table)),
                                      "Stress (psi)" => Vector{Union{Float64, Missing}}(missing, 3*nrow(yield_table))) # Allocate DataFrame with `missing``
     for i in 1:nrow(yield_table)
         local j = 3 * (i - 1) + 1
-        tables["EPP Stable"][j, "Temperature (°F)"] = yield_table.T[i]
-        tables["EPP Stable"][j, "Plastic Strain (in in^-1)"] = 0.0
-        tables["EPP Stable"][j, "Stress (psi)"] = yield_table.σ_ys[i]
+        tables["EPP"][j, "Temperature (°F)"] = yield_table.T[i]
+        tables["EPP"][j, "Plastic Strain (in in^-1)"] = 0.0
+        tables["EPP"][j, "Stress (psi)"] = yield_table.σ_ys[i]
 
-        tables["EPP Stable"][j+1, "Plastic Strain (in in^-1)"] = increase_in_plastic_strain
-        tables["EPP Stable"][j+1, "Stress (psi)"] = yield_table.σ_ys[i] * (1 + increase_in_strength)
+        tables["EPP"][j+1, "Plastic Strain (in in^-1)"] = increase_in_plastic_strain
+        tables["EPP"][j+1, "Stress (psi)"] = yield_table.σ_ys[i] * (1 + increase_in_strength)
     end
 
     return tables

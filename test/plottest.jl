@@ -16,11 +16,12 @@ user_input = (spec_no = "SA-723",
 ASME_tables, ASME_groups = read_ASME_tables(user_input)
 ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
-fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input)
-fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)
-fig_tc, fig_te, fig_ym, fig_ps = plot_ANSYS_tables(ANSYS_tables, user_input.material_string)
+fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input)
+fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)
+fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input.material_string)
 
 display(fig_tc)
 display(fig_te)
 display(fig_ym)
 display(fig_ps)
+display(fig_epp)
