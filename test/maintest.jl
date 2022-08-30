@@ -1,9 +1,9 @@
-using ASME_Materials
+using ASME_Materials, GLMakie, Printf
 
 # User Inputs
 spec_no = "SA-723"
 type_grade = "3"
-class_condition_temper = "2a"
+class_condition_temper = "2"
 tableKM620_material_category = "Ferritic steel"
 output_folder = raw"S:\Material Properties\Excel Material Data\AIP Q&T Steels"
 
@@ -27,4 +27,22 @@ user_input = (spec_no = spec_no,
                 material_dict = material_dict)
 
 # Function Call
-main(user_input)
+data = main(user_input)
+
+σ = vcat(0, first(data.ANSYS_tables["Stress-Strain"].σ_t)[1:5])
+ϵ = vcat(0, first(data.ANSYS_tables["Stress-Strain"].ϵ_ts)[1:5])
+ϵp = vcat(0, first(data.ANSYS_tables["Stress-Strain"].γ_total)[1:5])
+E = diff(σ) ./ diff(ϵ)
+Ep = diff(σ) ./ diff(ϵp)
+
+fig = Figure()
+axis = Axis(fig[1,1],
+            title = "Stress-Strain Curve of $material_string",
+            xlabel = "ϵ (in/in)",
+            ylabel = "σ (psi)")
+scatterlines!(ϵ, σ, label = "Elastic + Plastic")
+annotations!([@sprintf("E = %8.2e", i) for i in E], Point.(ϵ, σ .- 500)[begin+1:end], textsize = 20)
+scatterlines!(ϵp, σ, label = "Plastic")
+annotations!([@sprintf("E = %8.2e", i) for i in Ep], Point.(ϵp, σ .- 500)[begin+1:end], textsize = 20)
+Legend(fig[1,2], axis, "Strain Type")
+display(fig)
