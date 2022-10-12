@@ -29,12 +29,14 @@ function tableKM620_options()
                                 , style = "dim")
     note_panel = Panel(note_text,
                         title = "Note",
-                        style = "cyan")
+                        style = "cyan",
+                        fit = true)
     top_text = TextBox(option_numbers * " " * vline * " " * option_text,
                         padding = (2, 0, 0, 0))
     options_panel = Panel(top_text / note_panel,
                         title = "Table KM-620 Material Categories",
-                        style = "cyan")
+                        style = "cyan",
+                        fit = true)
     return options_panel
 end
 
@@ -53,7 +55,8 @@ function yield_options()
     options_panel = Panel(option_numbers * " " * vline * " " * option_text,
                             title = "Yield Point Calculation Options",
                             style = "cyan",
-                            padding = (5, 5, 1, 1))
+                            padding = (5, 5, 1, 1),
+                            fit = true)
     return options_panel
 end
 
