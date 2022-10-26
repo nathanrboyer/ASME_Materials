@@ -1,15 +1,15 @@
 # Mandatory Appendix 1: Nomenclature
 #=
-A = <undefined>
 A_1 = curve fitting constant for the elastic region of the stress-strain curve (KM-620)
 A_2 = curve fitting constant for the plastic region of the stress-strain curve (KM-620)
 E_y = modulus of elasticity evaluated at the temperature of interest, see ASME Section II Part D
+El = minimum specified elongation, %
 H = <undefined>
 K = <undefined>
-l = <undefined>
 m_1 = <undefined>
 m_2 = <undefined>
-R = <undefined>
+R = Sy/Su
+RA = minimum specified reduction of area, %
 γ_1 = true strain in the micro-strain region of the stress-strain curve (KM-620)
 γ_2 = true strain in the macro-strain region of the stress-strain curve (KM-620)
 ϵ_p = stress-strain curve fitting parameter (KM-620)
@@ -60,14 +60,14 @@ const tableKM620 = DataFrame("Material" => ["Ferritic steel",
                                         R -> 0.52 * (0.98 - R),
                                         R -> 0.50 * (1.00 - R),
                                         R -> 0.50 * (0.98 - R)],
-                                "m₃" => [(E,l) -> 2*log(1+(E*l/100)),
-                                        (E,l) -> 3*log(1+(E*l/100)),
-                                        (E,l) -> 2*log(1+(E*l/100)),
-                                        (E,l) -> 1*log(1+(E*l/100)),
-                                        (E,l) -> 1.3*log(1+(E*l/100)),
-                                        (E,l) -> 2*log(1+(E*l/100)),
-                                        (E,l) -> 1.3*log(1+(E*l/100))],
-                                "m₄" => (R,A) -> log(100 / (100 - R*A)),
+                                "m₃" => [(El) -> 2*log(1+(El/100)),
+                                        (El) -> 3*log(1+(El/100)),
+                                        (El) -> 2*log(1+(El/100)),
+                                        (El) -> 1*log(1+(El/100)),
+                                        (El) -> 1.3*log(1+(El/100)),
+                                        (El) -> 2*log(1+(El/100)),
+                                        (El) -> 1.3*log(1+(El/100))],
+                                "m₄" => (RA) -> log(100 / (100 - RA)),
                                 "m₅" => [2.2,
                                         0.6,
                                         2.2,
