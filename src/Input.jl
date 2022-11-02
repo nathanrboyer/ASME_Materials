@@ -121,7 +121,11 @@ function get_user_input()
     valid = false
     local yield_option, overwrite_yield, proportional_limit_default, proportional_limit
     while valid == false
-        yield_option = parse_input(Int, yield_option_default)
+        try
+            yield_option = parse_input(Int, yield_option_default)
+        catch
+            yield_option = -1 # Dummy value to reach else branch
+        end
         if yield_option == 1
             overwrite_yield = true
             proportional_limit = tableKM620[yield_option, "ϵₚ"]
