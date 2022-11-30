@@ -21,7 +21,7 @@ end
 Returns a terminal panel with the material information from Table KM-620. Call `print` or `println` on the result to diplay it.
 """
 function tableKM620_options()
-    option_text = RenderableText(join(tableKM620."Material", "\n"), style = "dim")
+    option_text = RenderableText(join(KM620.coefficients_table."Material", "\n"), style = "dim")
     option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
     vline = vLine(option_numbers, style = "cyan")
     note_text = RenderableText("Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
@@ -104,7 +104,7 @@ function get_user_input()
     while valid == false
         try
             tableKM620_material_category_number = parse_input(Int, tableKM620_material_category_number_default)
-            tableKM620_material_category = tableKM620."Material"[tableKM620_material_category_number]
+            tableKM620_material_category = KM620.coefficients_table."Material"[tableKM620_material_category_number]
             valid = true
         catch
             tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
@@ -128,7 +128,7 @@ function get_user_input()
         end
         if yield_option == 1
             overwrite_yield = true
-            proportional_limit = tableKM620[yield_option, "ϵₚ"]
+            proportional_limit = KM620.coefficients_table[yield_option, "ϵₚ"]
             valid = true
         elseif yield_option == 2
             overwrite_yield = false

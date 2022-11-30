@@ -2,18 +2,21 @@ module ASME_Materials
 
 # Load Packages
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, XLSX
+import KM620
 
 # Export Function Names
 export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_sleep_stress, make_material_dict, goodbye_message
 
 # Define Functions
-include("KM610.jl")
-include("KM620.jl")
 include("Input.jl")
 include("ReadTables.jl")
 include("TransformTables.jl")
 include("WriteTables.jl")
 include("PlotTables.jl")
+
+# KM-610 Ideally Elastic Plastic Stability Parameters
+const increase_in_strength = 0.05 # 5%
+const increase_in_plastic_strain = 0.20 # 20%
 
 # Welcome Message
 function __init__()
