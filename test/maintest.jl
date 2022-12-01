@@ -4,7 +4,7 @@ using ASME_Materials, GLMakie, Printf
 spec_no = "SA-723"
 type_grade = "3"
 class_condition_temper = "2"
-tableKM620_material_category = "Ferritic steel"
+KM620_coefficients_table_material_category = "Ferritic steel"
 output_folder = raw"S:\Material Properties\Excel Material Data\AIP Q&T Steels"
 
 # Function Inputs
@@ -15,7 +15,7 @@ plot_folder = joinpath(output_folder, "Plots")
 user_input = (spec_no = spec_no,
                 type_grade = type_grade,
                 class_condition_temper = class_condition_temper,
-                tableKM620_material_category = tableKM620_material_category,
+                KM620_coefficients_table_material_category = KM620_coefficients_table_material_category,
                 num_output_stress_points = 50,
                 overwrite_yield = true,
                 proportional_limit = 2.0e-5,

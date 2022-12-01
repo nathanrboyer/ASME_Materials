@@ -52,11 +52,11 @@ function find_true_yield_stress(table::DataFrame, proportional_limit)
         γ_total_value = 0.0
         σ_t_value = 0.0
         while γ_total_value < proportional_limit
-            H_value = H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
-            ϵ_1_value = ϵ_1(σ_t_value, A_1_value, m_1_value)
-            ϵ_2_value = ϵ_2(σ_t_value, A_2_value, m_2_value)
-            γ_1_value = γ_1(ϵ_1_value, H_value)
-            γ_2_value = γ_2(ϵ_2_value, H_value)
+            H_value = KM620.H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
+            ϵ_1_value = KM620.ϵ_1(σ_t_value, A_1_value, m_1_value)
+            ϵ_2_value = KM620.ϵ_2(σ_t_value, A_2_value, m_2_value)
+            γ_1_value = KM620.γ_1(ϵ_1_value, H_value)
+            γ_2_value = KM620.γ_2(ϵ_2_value, H_value)
             γ_total_value = γ_1_value + γ_2_value
             σ_t_value += σ_increment
         end
@@ -68,7 +68,7 @@ end
 """
     ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
                                                                     material_dict::Dict,
-                                                                    tableKM620_material_category::String,
+                                                                    KM620_coefficients_table_material_category::String,
                                                                     num_output_stress_points::Int,
                                                                     overwrite_yield::Bool,
                                                                     proportional_limit::Float64, _...)
@@ -77,7 +77,7 @@ Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`.
 
 # Keyword Arguments (Required)
 - `material_dict::Dict`: Dictionary for material DataFrame filtering. Call make_material_dict(spec_no, type_grade, class_condition_temper) to make.
-- `tableKM620_material_category::String`: Material Category from Section VIII Division 3 Table KM-620.
+- `KM620_coefficients_table_material_category::String`: Material Category from Section VIII Division 3 Table KM-620.
 - `num_output_stress_points::Int`: Number of evenly-spaced stress-strain points to compute on curve between yield and ultimate stress.
 - `overwrite_yield::Bool`: True/False whether to compute a new yield stress using a plastic strain tolerance different from the default 0.002 in/in.
 - `proportional_limit::Float64`: Minimum plastic strain value to consider as yielded.
@@ -85,7 +85,7 @@ Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`.
 """
 function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
                                 material_dict::Dict,
-                                tableKM620_material_category::String,
+                                KM620_coefficients_table_material_category::String,
                                 num_output_stress_points::Int,
                                 overwrite_yield::Bool,
                                 proportional_limit::Float64,
@@ -96,7 +96,7 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
 
     # Density
     ρ = ASME_tables["PRD"][ASME_tables["PRD"]."Material" .== ASME_groups["PRD"], "Density (lb/inch^3)"] |> only
-    tables["Density"] = DataFrame("Temperature (°F)" => [""], "Density (lbm in^-3)" => [ρ])
+    tables["Density"] = DataFrame("Temperature (°F)" => [""], "Density (lb in^-3)" => [ρ])
 
     # Isotropic Instantaneous Coefficient of Thermal Expansion
     tables["Thermal Expansion"] = select(ASME_tables["TE"], "Temperature (°F)", "A (10^-6 inch/inch/°F)" => ByRow(x -> x*10^-6) => "Coefficient of Thermal Expansion (°F^-1)") |> dropmissing
@@ -131,28 +131,28 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
     tables["Stress-Strain"].ν = poisson_interp.(tables["Stress-Strain"].T)
 
     ## Apply KM620 to Stress-Strain Table
-    tables["Stress-Strain"].R = R.(tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].σ_uts)
-    tables["Stress-Strain"].K = K.(tables["Stress-Strain"].R)
-    tables["Stress-Strain"].ϵ_ys = fill(ϵ_ys(), nrow(tables["Stress-Strain"]))
-    tables["Stress-Strain"].ϵ_p = fill(only(tableKM620[tableKM620."Material" .== tableKM620_material_category, "ϵₚ"]), nrow(tables["Stress-Strain"]))
-    tables["Stress-Strain"].m_1 = m_1.(tables["Stress-Strain"].R, tables["Stress-Strain"].ϵ_p, tables["Stress-Strain"].ϵ_ys)
-    tables["Stress-Strain"].m_2 = only(tableKM620[tableKM620."Material" .== tableKM620_material_category, "m₂"]).(tables["Stress-Strain"].R)
-    tables["Stress-Strain"].A_1 = A_1.(tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].ϵ_ys, tables["Stress-Strain"].m_1)
-    tables["Stress-Strain"].A_2 = A_2.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
-    tables["Stress-Strain"].σ_utst = σ_utst.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
+    tables["Stress-Strain"].R = KM620.R.(tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].σ_uts)
+    tables["Stress-Strain"].K = KM620.K.(tables["Stress-Strain"].R)
+    tables["Stress-Strain"].ϵ_ys = fill(KM620.ϵ_ys(), nrow(tables["Stress-Strain"]))
+    tables["Stress-Strain"].ϵ_p = fill(only(KM620.coefficients_table[KM620.coefficients_table."Material" .== KM620_coefficients_table_material_category, "ϵₚ"]), nrow(tables["Stress-Strain"]))
+    tables["Stress-Strain"].m_1 = KM620.m_1.(tables["Stress-Strain"].R, tables["Stress-Strain"].ϵ_p, tables["Stress-Strain"].ϵ_ys)
+    tables["Stress-Strain"].m_2 = only(KM620.coefficients_table[KM620.coefficients_table."Material" .== KM620_coefficients_table_material_category, "m₂"]).(tables["Stress-Strain"].R)
+    tables["Stress-Strain"].A_1 = KM620.A_1.(tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].ϵ_ys, tables["Stress-Strain"].m_1)
+    tables["Stress-Strain"].A_2 = KM620.A_2.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
+    tables["Stress-Strain"].σ_utst = KM620.σ_utst.(tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].m_2)
     if overwrite_yield == true
         tables["Stress-Strain"].σ_ys_true = find_true_yield_stress(tables["Stress-Strain"], proportional_limit)
         tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys_true[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
     else
         tables["Stress-Strain"].σ_t = [range(start = tables["Stress-Strain"].σ_ys[i], stop = tables["Stress-Strain"].σ_utst[i], length = num_output_stress_points) for i in 1:nrow(tables["Stress-Strain"])]
     end
-    tables["Stress-Strain"].H = H.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].K)
-    tables["Stress-Strain"].ϵ_1 = ϵ_1.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_1, tables["Stress-Strain"].m_1)
-    tables["Stress-Strain"].ϵ_2 = ϵ_2.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_2, tables["Stress-Strain"].m_2)
-    tables["Stress-Strain"].γ_1 = γ_1.(tables["Stress-Strain"].ϵ_1, tables["Stress-Strain"].H)
-    tables["Stress-Strain"].γ_2 = γ_2.(tables["Stress-Strain"].ϵ_2, tables["Stress-Strain"].H)
+    tables["Stress-Strain"].H = KM620.H.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].σ_ys, tables["Stress-Strain"].σ_uts, tables["Stress-Strain"].K)
+    tables["Stress-Strain"].ϵ_1 = KM620.ϵ_1.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_1, tables["Stress-Strain"].m_1)
+    tables["Stress-Strain"].ϵ_2 = KM620.ϵ_2.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].A_2, tables["Stress-Strain"].m_2)
+    tables["Stress-Strain"].γ_1 = KM620.γ_1.(tables["Stress-Strain"].ϵ_1, tables["Stress-Strain"].H)
+    tables["Stress-Strain"].γ_2 = KM620.γ_2.(tables["Stress-Strain"].ϵ_2, tables["Stress-Strain"].H)
     tables["Stress-Strain"].γ_total = tables["Stress-Strain"].γ_1 .+ tables["Stress-Strain"].γ_2
-    tables["Stress-Strain"].ϵ_ts = ϵ_ts.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].E_y, tables["Stress-Strain"].γ_1, tables["Stress-Strain"].γ_2)
+    tables["Stress-Strain"].ϵ_ts = KM620.ϵ_ts.(tables["Stress-Strain"].σ_t, tables["Stress-Strain"].E_y, tables["Stress-Strain"].γ_1, tables["Stress-Strain"].γ_2)
 
     ## Build Temperature Table from Stress-Strain Table
     tables["Temperature"] = DataFrame("Temperature (°F)" => tables["Stress-Strain"].T)
@@ -164,6 +164,12 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
         tables["Hardening $(temp)°F"]."Stress (psi)" = tables["Stress-Strain"][i,"σ_t"]
         tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)"[1] = 0.0 # Artificially move first datapoint to zero strain. (ANSYS Requirement)
     end
+
+    # Yield Strength
+    tables["Yield Strength"] = select(yield_table, :T => "Temperature (°F)", :σ_ys => "Yield Strength (psi)")
+
+    # Ultimate Strength
+    tables["Ultimate Strength"] = select(ultimate_table, :T => "Temperature (°F)", :σ_uts => "Tensile Ultimate Strength (psi)")
 
     # Isotropic Thermal Conductivity
     tables["Thermal Conductivity"] = select(ASME_tables["TCD"], "Temperature (°F)", "TC (Btu/hr-ft-°F)" => ByRow(x -> x / 3600 / 12) => "TC (Btu s^-1 in ^-1 °F^-1)") |> dropmissing

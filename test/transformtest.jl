@@ -26,7 +26,7 @@ end
 user_input = (spec_no = "SA-723",
                 type_grade = "3",
                 class_condition_temper = "2a",
-                tableKM620_material_category = "Ferritic steel",
+                KM620_coefficients_table_material_category = "Ferritic steel",
                 num_output_stress_points = 50,
                 overwrite_yield = true,
                 proportional_limit = 2.0e-5,

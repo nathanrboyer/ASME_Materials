@@ -96,15 +96,15 @@ function get_user_input()
     tprint("Class/Condition/Temper: {dim}(Default: $class_condition_temper_default) {/dim}", highlight=false)
     class_condition_temper = parse_input(String, class_condition_temper_default)
 
-    tableKM620_material_category_number_default = 1
+    KM620_coefficients_table_material_category_number_default = 1
     tprint(tableKM620_options())
-    tprint("Table KM-620 Material Category: {dim}(Default: $tableKM620_material_category_number_default) {/dim}", highlight=false)
+    tprint("Table KM-620 Material Category: {dim}(Default: $KM620_coefficients_table_material_category_number_default) {/dim}", highlight=false)
     valid = false
-    local tableKM620_material_category_number, tableKM620_material_category
+    local KM620_coefficients_table_material_category_number, KM620_coefficients_table_material_category
     while valid == false
         try
-            tableKM620_material_category_number = parse_input(Int, tableKM620_material_category_number_default)
-            tableKM620_material_category = KM620.coefficients_table."Material"[tableKM620_material_category_number]
+            KM620_coefficients_table_material_category_number = parse_input(Int, KM620_coefficients_table_material_category_number_default)
+            KM620_coefficients_table_material_category = KM620.coefficients_table."Material"[KM620_coefficients_table_material_category_number]
             valid = true
         catch
             tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
@@ -165,7 +165,7 @@ function get_user_input()
     user_input = (; spec_no,
                     type_grade,
                     class_condition_temper,
-                    tableKM620_material_category,
+                    KM620_coefficients_table_material_category,
                     num_output_stress_points,
                     overwrite_yield,
                     proportional_limit,

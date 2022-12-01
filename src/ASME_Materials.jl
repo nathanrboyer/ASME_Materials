@@ -47,15 +47,17 @@ end
 
 # Output Struct
 struct ASME_Materials_Data
-    user_input
-    ASME_tables
-    ASME_groups
-    ANSYS_tables
-    fig_tc
-    fig_te
-    fig_ym
-    fig_ps
-    fig_epp
+    user_input::NamedTuple
+    ASME_tables::Dict
+    ASME_groups::Dict
+    ANSYS_tables::Dict
+    fig_tc::Figure
+    fig_te::Figure
+    fig_ym::Figure
+    fig_ps::Figure
+    fig_ys::Figure
+    fig_uts::Figure
+    fig_epp::Figure
 end
 Base.show(io::IO, ::MIME"text/plain", x::ASME_Materials_Data) = tprint(io, "{dim}   Output Fields: $(join(fieldnames(typeof(x)),", ")){/dim}")
 
@@ -71,12 +73,12 @@ function main(user_input::NamedTuple)
     write_ANSYS_tables(ANSYS_tables, user_input)
 
     tprintln(@style "Plotting results ..." cyan italic)
-    fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input)
+    fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input)
     display(fig_ps)
 
     print("\n", goodbye_message(user_input.output_file_path))
 
-    return ASME_Materials_Data(user_input, ASME_tables, ASME_groups, ANSYS_tables, fig_tc, fig_te, fig_ym, fig_ps, fig_epp)
+    return ASME_Materials_Data(user_input, ASME_tables, ASME_groups, ANSYS_tables, fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp)
 end
 main() = main(get_user_input())
 
