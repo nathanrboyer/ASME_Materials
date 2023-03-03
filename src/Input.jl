@@ -150,11 +150,14 @@ function get_user_input()
     num_output_stress_points = parse_input(Int, num_output_stress_points_default)
 
     # Files
-    tprintln(@style "\nSelect the appropriate file locations below." underline cyan)
-    println("Locate and select the input file `Section II-D Tables.xlsx`.")
-    input_file_path = pick_file(raw"S:\Material Properties", filterlist="xlsx, XLSX")
-    println("Choose the correct folder (AIP Material Category) in which to save the output tables and figures.\n")
-    output_folder = pick_folder(raw"S:\Material Properties\Excel Material Data")
+    tprintln(@style "\nSelect the appropriate file location." underline cyan)
+    input_file_path = raw"S:\Material Properties\Excel Material Data\Section II-D Tables.xlsx"
+    if !isfile(input_file_path)
+        println("Locate and select the input file `Section II-D Tables.xlsx`.")
+        input_file_path = pick_file(filterlist="xlsx, XLSX")
+    end
+    println("Choose the correct material category folder in which to save the output tables and figures (e.g. Q&T Steels).\n")
+    output_folder = pick_folder(dirname(input_file_path))
 
     # Derived Quantities
     material_string = string(spec_no,'-',type_grade,'-',class_condition_temper)
