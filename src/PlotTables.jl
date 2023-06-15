@@ -1,11 +1,15 @@
 """
-    fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp = plot_ANSYS_tables(tables::Dict, material_string::String[, output_folder::String = pwd()])
+    plot_ANSYS_tables(
+        tables::Dict,
+        material_string::String,
+        output_folder::String = pwd()
+    ) -> fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp
 
 Plots ANSYS `tables`, titles figures with `material_string`, and saves figures to `output_folder`.
 
 # Figures
 - `fig_tc`: Thermal Conductivity
-- `fig_te`: Coefficient of Thermal Expansion Young's Modulus
+- `fig_te`: Coefficient of Thermal Expansion
 - `fig_ym`: Young's Modulus
 - `fig_ps`: Plastic Strain
 - `fig_ys`: Yield Strength
@@ -113,7 +117,7 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
 end
 
 """
-    fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp = plot_ANSYS_tables(tables::Dict, user_input::NamedTuple)
+    plot_ANSYS_tables(tables::Dict, user_input::NamedTuple) -> figures...
 
 Plots ANSYS `tables`, titles figures with `user_input.material_string`, and saves figures to `user_input.plot_folder`.
 

@@ -1,5 +1,5 @@
 """
-    table::DataFrame = readtable(filepath::String, sheetname::String)
+    readtable(filepath::String, sheetname::String) -> table::DataFrame
 
 Read table from given Excel file and sheet name.
 """
@@ -8,7 +8,7 @@ function readtable(filepath::String, sheetname::String)
 end
 
 """
-    group::String = findgroup(df::DataFrame, value)
+    findgroup(df::DataFrame, value) -> group::String
 
 Find table group from key table.
 """
@@ -24,7 +24,7 @@ function findgroup(df::DataFrame, value)
 end
 
 """
-    ASME_tables, ASME_groups = read_ASME_tables(filepath::String, material_dict::Dict)
+    read_ASME_tables(filepath::String, material_dict::Dict) -> ASME_tables, ASME_groups
 
 Make a dictionary of tables and groups read from sheets in the input Excel file located at `filepath`
 using `material_dict` to filter the resulting DataFrame to the selected material.
@@ -64,7 +64,7 @@ function read_ASME_tables(filepath::String, material_dict::Dict)
 end
 
 """
-    ASME_tables, ASME_groups = read_ASME_tables(user_input::NamedTuple)
+    read_ASME_tables(user_input::NamedTuple) -> ASME_tables, ASME_groups
 
 Make a dictionary of tables and groups read from the `user_input` information.
 Fieldnames `input_file_path` and `material_dict` are required to be in `user_input`.
@@ -76,7 +76,12 @@ function read_ASME_tables(user_input::NamedTuple)
 end
 
 """
-    ASME_tables, ASME_groups = read_ASME_tables(filepath, spec_no, type_grade, class_condition_temper)
+    read_ASME_tables(
+        filepath,
+        spec_no,
+        type_grade,
+        class_condition_temper
+    ) -> ASME_tables, ASME_groups
 
 Make a dictionary of tables and groups read from from sheets in the input Excel file located at `filepath`.
 `spec_no`, `type_grade`, and `class_condition_temper` define the material information to retrieve from the file.
@@ -87,7 +92,7 @@ function read_ASME_tables(filepath, spec_no, type_grade, class_condition_temper)
 end
 
 """
-    ASME_tables, ASME_groups = read_ASME_tables(; filepath, spec_no, type_grade, class_condition_temper, _...)
+    read_ASME_tables(; filepath, spec_no, type_grade, class_condition_temper, _...) -> ASME_tables, ASME_groups
 
 Make a dictionary of tables and groups read from from sheets in the input Excel file located at `filepath`.
 `spec_no`, `type_grade`, and `class_condition_temper` define the material information to retrieve from the file.

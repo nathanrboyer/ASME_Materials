@@ -1,79 +1,11 @@
 """
-    numeric_headers::Vector{Int} = get_numeric_headers(table::DataFrame)
+    transform_ASME_tables(ASME_tables, ASME_groups; kwargs...)
 
-Return all `table` column headers that can can be converted to integers.
-"""
-function get_numeric_headers(table::DataFrame)
-    numeric_headers = Int[]
-    for col in names(table)
-        try
-            num = parse(Int, col)
-            push!(numeric_headers, num)
-        catch
-            continue
-        end
-    end
-    return numeric_headers
-end
+Create new tables in ANSYS format from `ASME_tables` and `ASME_groups`.
 
-"""
-    row_data::Vector = get_row_data(table::DataFrame, conditions::Dict[, returncolumns])
-
-Returns the `table` row that meets all the provided `conditions`.
-`conditions` is a `Dict` which maps column names to filtering functions
-e.g. Dict("Column Name" => (x -> x .== cellvalue)).
-`returncolumns` can optionally be provided to return only certain columns of the DataFrame.
-`returncolumns` may be a single column index or a vector of column indices.
-"""
-function get_row_data(table::DataFrame, conditions::Dict, returncolumns)
-    subset(table, conditions...)[:,string.(returncolumns)] |> only |> Vector
-end
-function get_row_data(table::DataFrame, conditions::Dict)
-    subset(table, conditions...) |> only |> Vector
-end
-
-"""
-    find_true_yield_stress(table::DataFrame)
-
-Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
-"""
-function find_true_yield_stress(table::DataFrame, proportional_limit)
-    I = nrow(table) # Number of discrete temperature points.
-    σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
-    σ_ys_true = fill(0.0, I) # Initialize output vector.
-    for i in 1:I
-        σ_ys_value = table.σ_ys[i]
-        σ_uts_value = table.σ_uts[i]
-        K_value = table.K[i]
-        m_1_value = table.m_1[i]
-        m_2_value = table.m_2[i]
-        A_1_value = table.A_1[i]
-        A_2_value = table.A_2[i]
-        γ_total_value = 0.0
-        σ_t_value = 0.0
-        while γ_total_value < proportional_limit
-            H_value = KM620.H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
-            ϵ_1_value = KM620.ϵ_1(σ_t_value, A_1_value, m_1_value)
-            ϵ_2_value = KM620.ϵ_2(σ_t_value, A_2_value, m_2_value)
-            γ_1_value = KM620.γ_1(ϵ_1_value, H_value)
-            γ_2_value = KM620.γ_2(ϵ_2_value, H_value)
-            γ_total_value = γ_1_value + γ_2_value
-            σ_t_value += σ_increment
-        end
-        σ_ys_true[i] = σ_t_value
-    end
-    return σ_ys_true
-end
-
-"""
-    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
-                                                                    material_dict::Dict,
-                                                                    KM620_coefficients_table_material_category::String,
-                                                                    num_output_stress_points::Int,
-                                                                    overwrite_yield::Bool,
-                                                                    proportional_limit::Float64, _...)
-
-Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`.
+# Arguments
+- `ASME_tables::Dict{String, DataFrame}`: tables from `read_ASME_tables` function
+- `ASME_groups::Dict{String, String}`: groups from `read_ASME_tables` function
 
 # Keyword Arguments (Required)
 - `material_dict::Dict`: Dictionary for material DataFrame filtering. Call make_material_dict(spec_no, type_grade, class_condition_temper) to make.
@@ -81,6 +13,9 @@ Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`.
 - `num_output_stress_points::Int`: Number of evenly-spaced stress-strain points to compute on curve between yield and ultimate stress.
 - `overwrite_yield::Bool`: True/False whether to compute a new yield stress using a plastic strain tolerance different from the default 0.002 in/in.
 - `proportional_limit::Float64`: Minimum plastic strain value to consider as yielded.
+
+# Returns
+- `ANSYS_tables::Dict{String, DataFrame}`: collection of tables for defining an ANSYS material
 
 """
 function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
@@ -194,10 +129,84 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
 end
 
 """
-    ANSYS_tables::Dict{String, DataFrame} = transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
+    transform_ASME_tables(ASME_tables, ASME_groups, user_input) -> ANSYS_tables
 
 Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and `user_input`.
+
+# Arguments
+- `ASME_tables::Dict{String, DataFrame}`: collection of tables read from the `read_ASME_tables` function
+- `ASME_groups::Dict{String, String}`: collection of table groups read from the `read_ASME_tables` functio
+- `user_input::NamedTuple`: user input from the `get_user_input` function
+- `ANSYS_tables::Dict{String, DataFrame}`: collection of tables which define an ANSYS material
 """
 function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}, user_input::NamedTuple)
     transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String}; user_input...) # Splat user_input into keyword arguments.
+end
+
+"""
+    get_numeric_headers(table::DataFrame) -> numeric_headers::Vector{Int}
+
+Return all `table` column headers that can can be converted to integers.
+"""
+function get_numeric_headers(table::DataFrame)
+    numeric_headers = Int[]
+    for col in names(table)
+        try
+            num = parse(Int, col)
+            push!(numeric_headers, num)
+        catch
+            continue
+        end
+    end
+    return numeric_headers
+end
+
+"""
+    get_row_data(table::DataFrame, conditions::Dict) -> row_data::Vector
+    get_row_data(table::DataFrame, conditions::Dict, returncolumns) -> row_data::Vector
+
+Returns the `table` row that meets all the provided `conditions`.
+`conditions` is a `Dict` which maps column names to filtering functions
+e.g. Dict("Column Name" => (x -> x .== cellvalue)).
+`returncolumns` can optionally be provided to return only certain columns of the DataFrame.
+`returncolumns` may be a single column index or a vector of column indices.
+"""
+function get_row_data(table::DataFrame, conditions::Dict, returncolumns)
+    subset(table, conditions...)[:,string.(returncolumns)] |> only |> Vector
+end
+function get_row_data(table::DataFrame, conditions::Dict)
+    subset(table, conditions...) |> only |> Vector
+end
+
+"""
+    find_true_yield_stress(table::DataFrame) -> σ_ys_true::Number
+
+Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
+"""
+function find_true_yield_stress(table::DataFrame, proportional_limit)
+    I = nrow(table) # Number of discrete temperature points.
+    σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
+    σ_ys_true = fill(0.0, I) # Initialize output vector.
+    for i in 1:I
+        σ_ys_value = table.σ_ys[i]
+        σ_uts_value = table.σ_uts[i]
+        K_value = table.K[i]
+        m_1_value = table.m_1[i]
+        m_2_value = table.m_2[i]
+        A_1_value = table.A_1[i]
+        A_2_value = table.A_2[i]
+        γ_total_value = 0.0
+        σ_t_value = 0.0
+        while γ_total_value < proportional_limit
+            H_value = KM620.H(σ_t_value, σ_ys_value, σ_uts_value, K_value)
+            ϵ_1_value = KM620.ϵ_1(σ_t_value, A_1_value, m_1_value)
+            ϵ_2_value = KM620.ϵ_2(σ_t_value, A_2_value, m_2_value)
+            γ_1_value = KM620.γ_1(ϵ_1_value, H_value)
+            γ_2_value = KM620.γ_2(ϵ_2_value, H_value)
+            γ_total_value = γ_1_value + γ_2_value
+            σ_t_value += σ_increment
+        end
+        σ_ys_true[i] = σ_t_value
+    end
+    return σ_ys_true
 end

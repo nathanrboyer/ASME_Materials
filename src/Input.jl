@@ -1,80 +1,4 @@
 """
-    output = parse_input(type, default)
-
-Reads input from the REPL and converts it to the specified type.
-If nothing is entered, the default value is used.
-"""
-function parse_input(type, default)
-    input = readline()
-    if length(input) == 0
-        return default
-    end
-    if type == String
-        return input
-    end
-    return parse(type, input)
-end
-
-"""
-    tableKM620_options()
-
-Returns a terminal panel with the material information from Table KM-620. Call `print` or `println` on the result to diplay it.
-"""
-function tableKM620_options()
-    option_text = RenderableText(join(KM620.coefficients_table."Material", "\n"), style = "dim")
-    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
-    vline = vLine(option_numbers, style = "cyan")
-    note_text = RenderableText("Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
-                                "and ferritic, martensitic, and iron-based age-hardening stainless steels."
-                                , style = "dim")
-    note_panel = Panel(note_text,
-                        title = "Note",
-                        style = "cyan",
-                        fit = true)
-    top_text = TextBox(option_numbers * " " * vline * " " * option_text,
-                        padding = (2, 0, 0, 0))
-    options_panel = Panel(top_text / note_panel,
-                        title = "Table KM-620 Material Categories",
-                        style = "cyan",
-                        fit = true)
-    return options_panel
-end
-
-"""
-    yield_options()
-
-Returns a terminal panel with the yield strain calculation options. Call `print` or `println` on the result to diplay it.
-"""
-function yield_options()
-    option_text = RenderableText("Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
-                                "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
-                                "Specify my own proportional limit tolerance at yield.",
-                                style = "dim")
-    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
-    vline = vLine(option_numbers, style = "cyan")
-    options_panel = Panel(option_numbers * " " * vline * " " * option_text,
-                            title = "Yield Point Calculation Options",
-                            style = "cyan",
-                            padding = (5, 5, 1, 1),
-                            fit = true)
-    return options_panel
-end
-
-"""
-    material_dict::Dict{String, Function} = make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
-
-Create dictionary to filter DataFrame material properties from material specifications.
-
-Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
-"""
-function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
-    material_dict = Dict("Spec. No." => x -> x .== spec_no,
-                        "Type/Grade" => x -> x .== type_grade,
-                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
-    return material_dict
-end
-
-"""
     get_user_input()
 
 Gather user input required to perform the table transformation into a named tuple.
@@ -180,6 +104,86 @@ function get_user_input()
                     material_dict) # NamedTuple collection of all user inputs
 
     return user_input
+end
+
+"""
+    parse_input(type, default)
+
+Reads input from the REPL and converts it to the specified type.
+If nothing is entered, the default value is used.
+"""
+function parse_input(type, default)
+    input = readline()
+    if length(input) == 0
+        return default
+    end
+    if type == String
+        return input
+    end
+    return parse(type, input)
+end
+
+"""
+    tableKM620_options()
+
+Returns a terminal panel with the material information from Table KM-620. Call `print` or `println` on the result to diplay it.
+"""
+function tableKM620_options()
+    option_text = RenderableText(join(KM620.coefficients_table."Material", "\n"), style = "dim")
+    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
+    vline = vLine(option_numbers, style = "cyan")
+    note_text = RenderableText("Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
+                                "and ferritic, martensitic, and iron-based age-hardening stainless steels."
+                                , style = "dim")
+    note_panel = Panel(note_text,
+                        title = "Note",
+                        style = "cyan",
+                        fit = true)
+    top_text = TextBox(option_numbers * " " * vline * " " * option_text,
+                        padding = (2, 0, 0, 0))
+    options_panel = Panel(top_text / note_panel,
+                        title = "Table KM-620 Material Categories",
+                        style = "cyan",
+                        fit = true)
+    return options_panel
+end
+
+"""
+    yield_options()
+
+Returns a terminal panel with the yield strain calculation options. Call `print` or `println` on the result to diplay it.
+"""
+function yield_options()
+    option_text = RenderableText("Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
+                                "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
+                                "Specify my own proportional limit tolerance at yield.",
+                                style = "dim")
+    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
+    vline = vLine(option_numbers, style = "cyan")
+    options_panel = Panel(option_numbers * " " * vline * " " * option_text,
+                            title = "Yield Point Calculation Options",
+                            style = "cyan",
+                            padding = (5, 5, 1, 1),
+                            fit = true)
+    return options_panel
+end
+
+"""
+    make_material_dict(
+        spec_no::String,
+        type_grade::String,
+        class_condition_temper::String
+    ) -> material_dict::Dict{String, Function}
+
+Create dictionary to filter DataFrame material properties from material specifications.
+
+Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
+"""
+function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
+    material_dict = Dict("Spec. No." => x -> x .== spec_no,
+                        "Type/Grade" => x -> x .== type_grade,
+                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    return material_dict
 end
 
 """
