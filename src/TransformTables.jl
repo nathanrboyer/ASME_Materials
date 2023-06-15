@@ -53,10 +53,10 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
     ultimate_table =  DataFrame(T = ultimate_temps, σ_uts = ultimate_data) |> dropmissing
 
     ## Interpolation
-    yield_interp = LinearInterpolation(yield_table.T, yield_table.σ_ys, extrapolation_bc=Line())
-    ultimate_interp = LinearInterpolation(ultimate_table.T, ultimate_table.σ_uts, extrapolation_bc=Line())
-    elasticity_interp = LinearInterpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Young's Modulus (psi)", extrapolation_bc=Line())
-    poisson_interp = LinearInterpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Poisson's Ratio", extrapolation_bc=Line())
+    yield_interp = linear_interpolation(yield_table.T, yield_table.σ_ys, extrapolation_bc=Line())
+    ultimate_interp = linear_interpolation(ultimate_table.T, ultimate_table.σ_uts, extrapolation_bc=Line())
+    elasticity_interp = linear_interpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Young's Modulus (psi)", extrapolation_bc=Line())
+    poisson_interp = linear_interpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Poisson's Ratio", extrapolation_bc=Line())
 
     ## Build Stress-Strain Table with Interpolated Data
     tables["Stress-Strain"] = outerjoin(yield_table, ultimate_table, on = :T) |> sort

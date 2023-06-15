@@ -22,9 +22,9 @@ i200 = findfirst(df.T .== 200)
 df200 = DataFrame(st = df[i200, :σ_t], ets = df[i200, :ϵ_ts],  eps = df[i200, :γ_total], ees = df[i200, :ϵ_ts] .- df[i200, :γ_total])
 stress_value = 145001.533501501
 
-interp_ets = LinearInterpolation(df200.st, df200.ets)
-interp_eps = LinearInterpolation(df200.st, df200.eps)
-interp_ees = LinearInterpolation(df200.st, df200.ees)
+interp_ets = linear_interpolation(df200.st, df200.ets)
+interp_eps = linear_interpolation(df200.st, df200.eps)
+interp_ees = linear_interpolation(df200.st, df200.ees)
 
 println(df200)
 println("True Stress ", stress_value,

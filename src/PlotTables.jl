@@ -96,7 +96,7 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
                 title = "EPP Stress-Strain Curves of $material_string",
                 xlabel = "Total Strain (in in^-1)",
                 ylabel = "Stress (psi)")
-    elasticity_interp = LinearInterpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Young's Modulus (psi)", extrapolation_bc=Line())
+    elasticity_interp = linear_interpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Young's Modulus (psi)", extrapolation_bc=Line())
     largest_temp = tables["EPP"][end-2,"Temperature (°F)"]
     for i in 1:Int(nrow(tables["EPP"])/3)
         local j = 3 * (i - 1) + 1
