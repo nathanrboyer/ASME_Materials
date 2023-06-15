@@ -5,7 +5,7 @@ using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term,
 import KM620
 
 # Export Function Names
-export main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict, goodbye_message
+export ASME_Materials_Data, main, get_user_input, read_ASME_tables, transform_ASME_tables, write_ANSYS_tables, save_user_input, plot_ANSYS_tables, find_true_yield_stress, make_material_dict, goodbye_message
 
 # Define Functions
 include("Input.jl")
