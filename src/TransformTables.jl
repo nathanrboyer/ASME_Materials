@@ -94,10 +94,12 @@ function transform_ASME_tables(ASME_tables::Dict{String, DataFrame}, ASME_groups
 
     ## Build Hardening Tables from Stress-Strain Table
     for (i, temp) in enumerate(tables["Stress-Strain"].T)
-        tables["Hardening $(temp)°F"] = DataFrame()
-        tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)" = tables["Stress-Strain"][i,"γ_total"]
-        tables["Hardening $(temp)°F"]."Stress (psi)" = tables["Stress-Strain"][i,"σ_t"]
-        tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)"[1] = 0.0 # Artificially move first datapoint to zero strain. (ANSYS Requirement)
+        tables["Hardening $(temp)°F"] = DataFrame(
+            "Plastic Strain (in in^-1)" => tables["Stress-Strain"][i,"γ_total"],
+            "Stress (psi)" => tables["Stress-Strain"][i,"σ_t"],
+        )
+        ### Force first plastic strain value to exactly zero. (ANSYS requirement)
+        tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)"[begin] = 0
     end
 
     # Yield Strength
@@ -179,13 +181,13 @@ function get_row_data(table::DataFrame, conditions::Dict)
 end
 
 """
-    find_true_yield_stress(table::DataFrame) -> σ_ys_true::Number
+    find_true_yield_stress(table::DataFrame, proportional_limit) -> σ_ys_true::Number
 
-Searches for a more accurate yield stress based on a specified tolerance smaller than the standard ASME ϵ_ys=0.002 offset.
+Searches for a more accurate yield stress based on a specified `proportional_limit` smaller than the standard ASME ϵ_ys=0.002 offset.
 """
 function find_true_yield_stress(table::DataFrame, proportional_limit)
     I = nrow(table) # Number of discrete temperature points.
-    σ_increment = 0.1 # Stress increment in the while loop. (Balance accuracy and run time.)
+    σ_increment = 0.1 # Stress increment in the while loop (psi). (Balance accuracy and run time.)
     σ_ys_true = fill(0.0, I) # Initialize output vector.
     for i in 1:I
         σ_ys_value = table.σ_ys[i]
