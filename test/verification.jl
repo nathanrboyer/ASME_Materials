@@ -111,4 +111,5 @@ scatterlines!(ANSYS_tables["Hardening 200°F"]."Plastic Strain (in in^-1)", ANSY
 scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
 Legend(fig5[1,2], axis5, "Author")
 display(fig5)
-#save(joinpath(user_input.plot_folder,"verification.png"), fig5)
+save(joinpath(user_input.plot_folder,"Verification.png"), fig5)
+save(joinpath(pwd(), "Verification.png"), fig5)
