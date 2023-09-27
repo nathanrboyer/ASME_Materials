@@ -48,6 +48,12 @@ function read_ASME_tables(filepath::String, material_dict::Dict)
     transform!(tables["U"], "Type/Grade" => ByRow(string), renamecols=false)
     transform!(tables["U"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
 
+    # Ensure All Dashes are Normal Hypens
+    dash_to_hyphen(x) = eltype(x)<:AbstractString ? replace.(x, '–'=>'-', '—'=>'-') : x
+    for df in values(tables)
+        mapcols!(dash_to_hyphen, df)
+    end
+
     # Find Chemical Composition
     nomcomp = subset(tables["Y"], material_dict...)."Nominal Composition" |> only
     groups = Dict{String, String}()
