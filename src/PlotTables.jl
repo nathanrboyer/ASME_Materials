@@ -3,18 +3,18 @@
         tables::Dict,
         material_string::String,
         output_folder::String = pwd()
-    ) -> fig_tc, fig_te, fig_ym, fig_ps, fig_ys, fig_uts, fig_epp
+    ) -> figures::Dict{String, Figure}
 
 Plots ANSYS `tables`, titles figures with `material_string`, and saves figures to `output_folder`.
 
 # Figures
-- `fig_tc`: Thermal Conductivity
-- `fig_te`: Coefficient of Thermal Expansion
-- `fig_ym`: Young's Modulus
-- `fig_ps`: Plastic Strain
-- `fig_ys`: Yield Strength
-- `fig_uts`: Ultimate Tensile Strength
-- `fig_epp`: Elastic Perfectly Plastic Stress-Strain Curves with Stabilization
+- Thermal Conductivity
+- Thermal Expansion
+- Young's Modulus
+- Plastic Strain
+- Yield Strength
+- Ultimate Strength
+- Elastic Perfectly-Plastic (Stress-Strain Curves with Stabilization)
 """
 function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder::String = pwd())
     mkpath(output_folder)
@@ -96,39 +96,58 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
                 title = "EPP Stress-Strain Curves of $material_string",
                 xlabel = "Total Strain (in in^-1)",
                 ylabel = "Stress (psi)")
-    elasticity_interp = linear_interpolation(tables["Elasticity"]."Temperature (°F)", tables["Elasticity"]."Young's Modulus (psi)", extrapolation_bc=Line())
+    elasticity_interp = linear_interpolation(
+        tables["Elasticity"]."Temperature (°F)",
+        tables["Elasticity"]."Young's Modulus (psi)",
+        extrapolation_bc=Line()
+    )
     largest_temp = tables["EPP"][end-2,"Temperature (°F)"]
     for i in 1:Int(nrow(tables["EPP"])/3)
         local j = 3 * (i - 1) + 1
         local temp = tables["EPP"][j, "Temperature (°F)"]
         local yield_stress = tables["EPP"][j, "Stress (psi)"]
         local ultimate_stress = tables["EPP"][j+1, "Stress (psi)"]
-        local yield_strain = yield_stress/elasticity_interp(temp) + tables["EPP"][j, "Plastic Strain (in in^-1)"]
-        local ultimate_strain = ultimate_stress/elasticity_interp(temp) + tables["EPP"][j+1, "Plastic Strain (in in^-1)"]
+        local yield_strain = yield_stress/elasticity_interp(temp) +
+                                tables["EPP"][j, "Plastic Strain (in in^-1)"]
+        local ultimate_strain = ultimate_stress/elasticity_interp(temp) +
+                                tables["EPP"][j+1, "Plastic Strain (in in^-1)"]
         local x = [0, yield_strain, ultimate_strain]
         local y = [0, yield_stress, ultimate_stress]
-        scatterlines!(x, y, label = "$(temp)°F", color=ColorSchemes.rainbow[temp/largest_temp])
+        scatterlines!(
+            x, y,
+            label = "$(temp)°F", color=ColorSchemes.rainbow[temp/largest_temp]
+        )
     end
     Legend(fig7[1,2], axis7, "Temperature")
     display(fig7)
     save(joinpath(output_folder,string(material_string,"-EPPStabilized",".png")), fig7)
 
-    return fig1, fig2, fig3, fig4, fig5, fig6, fig7
+    figures = Dict(
+        "Thermal Conductivity" => fig1,
+        "Thermal Expansion" => fig2,
+        "Young's Modulus" => fig3,
+        "Plastic Strain" => fig4,
+        "Yield Strength" => fig5,
+        "Ultimate Strength" => fig6,
+        "Elastic Perfectly-Plastic" => fig7,
+    )
+    return figures
 end
 
 """
-    plot_ANSYS_tables(tables::Dict, user_input::NamedTuple) -> figures...
+    plot_ANSYS_tables(tables::Dict, user_input::NamedTuple) -> figures::Dict
 
-Plots ANSYS `tables`, titles figures with `user_input.material_string`, and saves figures to `user_input.plot_folder`.
+Plots ANSYS `tables`, titles figures with `user_input.material_string`,
+and saves figures to `user_input.plot_folder`.
 
 # Figures
-- `fig_tc`: Thermal Conductivity
-- `fig_te`: Coefficient of Thermal Expansion Young's Modulus
-- `fig_ym`: Young's Modulus
-- `fig_ps`: Plastic Strain
-- `fig_ys`: Yield Strength
-- `fig_uts`: Ultimate Tensile Strength
-- `fig_epp`: Elastic Perfectly Plastic Stress-Strain Curves with Stabilization
+- Thermal Conductivity
+- Thermal Expansion
+- Young's Modulus
+- Plastic Strain
+- Yield Strength
+- Ultimate Strength
+- Elastic Perfectly-Plastic (Stress-Strain Curves with Stabilization)
 """
 function plot_ANSYS_tables(tables::Dict, user_input::NamedTuple)
     material_string = user_input.material_string

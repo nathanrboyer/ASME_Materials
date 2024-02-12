@@ -6,7 +6,8 @@ Gather user input required to perform the table transformation into a named tupl
 function get_user_input()
     # Material Specification
     tprintln(@style "Material Information" underline cyan)
-    tprintln(@style "Enter the following material information with no special characters or spaces, or press Enter to accept the default value." dim)
+    tprintln(@style "Enter the following material information with no special characters or spaces, \
+        or press Enter to accept the default value." dim)
 
     spec_no_default = "SA-723"
     tprint("Specification Number: {dim}(Default: $spec_no_default) {/dim}", highlight=false)
@@ -17,31 +18,49 @@ function get_user_input()
     type_grade = parse_input(String, type_grade_default)
 
     class_condition_temper_default = "2a"
-    tprint("Class/Condition/Temper: {dim}(Default: $class_condition_temper_default) {/dim}", highlight=false)
+    tprint(
+        "Class/Condition/Temper: {dim}(Default: $class_condition_temper_default) {/dim}",
+        highlight=false,
+    )
     class_condition_temper = parse_input(String, class_condition_temper_default)
 
     KM620_coefficients_table_material_category_number_default = 1
     tprint(tableKM620_options())
-    tprint("Table KM-620 Material Category: {dim}(Default: $KM620_coefficients_table_material_category_number_default) {/dim}", highlight=false)
+    tprint(
+        "Table KM-620 Material Category: \
+            {dim}(Default: $KM620_coefficients_table_material_category_number_default) {/dim}",
+        highlight=false,
+    )
     valid = false
-    local KM620_coefficients_table_material_category_number, KM620_coefficients_table_material_category
+    local KM620_coefficients_table_material_category
+    local KM620_coefficients_table_material_category_number
     while valid == false
         try
-            KM620_coefficients_table_material_category_number = parse_input(Int, KM620_coefficients_table_material_category_number_default)
-            KM620_coefficients_table_material_category = KM620.coefficients_table."Material"[KM620_coefficients_table_material_category_number]
+            KM620_coefficients_table_material_category_number = parse_input(
+                Int,
+                KM620_coefficients_table_material_category_number_default
+            )
+            KM620_coefficients_table_material_category = KM620.coefficients_table."Material"[
+                KM620_coefficients_table_material_category_number
+            ]
             valid = true
         catch
-            tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
+            tprint(@style "Invalid option. \
+                Please enter an integer number corresponding to one of the options above: " red)
         end
     end
 
     # Simulation Parameters
     tprintln(@style "\nSimulation Parameters" underline cyan)
-    tprintln(@style "Enter the following simulation parameters with no special characters or spaces, or press Enter to accept the default value." dim)
+    tprintln(@style "Enter the following simulation parameters with no special characters or spaces, \
+        or press Enter to accept the default value." dim)
 
     yield_option_default = 1
     tprint(yield_options())
-    tprint("Yield Point Calculation Option: {dim}(Default: $yield_option_default) {/dim}", highlight=false)
+    tprint(
+        "Yield Point Calculation Option: {dim}(Default: $yield_option_default) {/dim}",
+        highlight=false,
+    )
     valid = false
     local yield_option, overwrite_yield, proportional_limit_default, proportional_limit
     while valid == false
@@ -61,16 +80,21 @@ function get_user_input()
         elseif yield_option == 3
             overwrite_yield = true
             proportional_limit_default = 1E-6
-            tprint("Proportional Limit Tolerance: {dim}(Default: $proportional_limit_default) {/dim}", highlight=false)
+            tprint(
+                "Proportional Limit Tolerance: {dim}(Default: $proportional_limit_default) {/dim}",
+                highlight=false,
+            )
             proportional_limit = parse_input(Float64, proportional_limit_default)
             valid = true
         else
-            tprint(@style "Invalid option. Please enter an integer number corresponding to one of the options above: " red)
+            tprint(@style "Invalid option. \
+                Please enter an integer number corresponding to one of the options above: " red)
         end
     end
 
     num_output_stress_points_default = 20
-    tprint("Number of Plastic Stress-Strain Points: {dim}(Default: $num_output_stress_points_default) {/dim}", highlight=false)
+    tprint("Number of Plastic Stress-Strain Points: \
+        {dim}(Default: $num_output_stress_points_default) {/dim}", highlight=false)
     num_output_stress_points = parse_input(Int, num_output_stress_points_default)
 
     # Files
@@ -80,7 +104,8 @@ function get_user_input()
         println("Locate and select the input file `Section II-D Tables.xlsx`.")
         input_file_path = pick_file(filterlist="xlsx, XLSX")
     end
-    println("Choose the correct material category folder in which to save the output tables and figures (e.g. Q&T Steels).\n")
+    println("Choose the correct material category folder \
+        in which to save the output tables and figures (e.g. Q&T Steels).\n")
     output_folder = pick_folder(dirname(input_file_path))
 
     # Derived Quantities
@@ -89,19 +114,21 @@ function get_user_input()
     output_file_path = joinpath(output_folder, material_string*".xlsx")
     plot_folder = joinpath(output_folder, "Plots")
 
-    user_input = (; spec_no,
-                    type_grade,
-                    class_condition_temper,
-                    KM620_coefficients_table_material_category,
-                    num_output_stress_points,
-                    overwrite_yield,
-                    proportional_limit,
-                    input_file_path,
-                    output_file_path,
-                    output_folder,
-                    plot_folder,
-                    material_string,
-                    material_dict) # NamedTuple collection of all user inputs
+    user_input = (;
+        spec_no,
+        type_grade,
+        class_condition_temper,
+        KM620_coefficients_table_material_category,
+        num_output_stress_points,
+        overwrite_yield,
+        proportional_limit,
+        input_file_path,
+        output_file_path,
+        output_folder,
+        plot_folder,
+        material_string,
+        material_dict,
+    ) # NamedTuple collection of all user inputs
 
     return user_input
 end
@@ -126,45 +153,68 @@ end
 """
     tableKM620_options()
 
-Returns a terminal panel with the material information from Table KM-620. Call `print` or `println` on the result to diplay it.
+Returns a terminal panel with the material information from Table KM-620.
+Call `print` or `println` on the result to diplay it.
 """
 function tableKM620_options()
-    option_text = RenderableText(join(KM620.coefficients_table."Material", "\n"), style = "dim")
-    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
+    option_text = RenderableText(
+        join(KM620.coefficients_table."Material", "\n"),
+        style = "dim",
+    )
+    option_numbers = RenderableText(
+        join(string.(collect(1:option_text.measure.h)), "\n"),
+        style = "dim",
+    )
     vline = vLine(option_numbers, style = "cyan")
-    note_text = RenderableText("Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
-                                "and ferritic, martensitic, and iron-based age-hardening stainless steels."
-                                , style = "dim")
-    note_panel = Panel(note_text,
-                        title = "Note",
-                        style = "cyan",
-                        fit = true)
-    top_text = TextBox(option_numbers * " " * vline * " " * option_text,
-                        padding = (2, 0, 0, 0))
-    options_panel = Panel(top_text / note_panel,
-                        title = "Table KM-620 Material Categories",
-                        style = "cyan",
-                        fit = true)
+    note_text = RenderableText(
+        "Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
+        "and ferritic, martensitic, and iron-based age-hardening stainless steels.",
+        style = "dim",
+    )
+    note_panel = Panel(
+        note_text,
+        title = "Note",
+        style = "cyan",
+        fit = true,
+    )
+    top_text = TextBox(
+        option_numbers * " " * vline * " " * option_text,
+        padding = (2, 0, 0, 0),
+    )
+    options_panel = Panel(
+        top_text / note_panel,
+        title = "Table KM-620 Material Categories",
+        style = "cyan",
+        fit = true,
+    )
     return options_panel
 end
 
 """
     yield_options()
 
-Returns a terminal panel with the yield strain calculation options. Call `print` or `println` on the result to diplay it.
+Returns a terminal panel with the yield strain calculation options.
+Call `print` or `println` on the result to diplay it.
 """
 function yield_options()
-    option_text = RenderableText("Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
-                                "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
-                                "Specify my own proportional limit tolerance at yield.",
-                                style = "dim")
-    option_numbers = RenderableText(join(string.(collect(1:option_text.measure.h)), "\n"), style = "dim")
+    option_text = RenderableText(
+        "Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
+        "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
+        "Specify my own proportional limit tolerance at yield.",
+        style = "dim",
+    )
+    option_numbers = RenderableText(
+        join(string.(collect(1:option_text.measure.h)), "\n"),
+        style = "dim",
+    )
     vline = vLine(option_numbers, style = "cyan")
-    options_panel = Panel(option_numbers * " " * vline * " " * option_text,
-                            title = "Yield Point Calculation Options",
-                            style = "cyan",
-                            padding = (5, 5, 1, 1),
-                            fit = true)
+    options_panel = Panel(
+        option_numbers * " " * vline * " " * option_text,
+        title = "Yield Point Calculation Options",
+        style = "cyan",
+        padding = (5, 5, 1, 1),
+        fit = true,
+    )
     return options_panel
 end
 
@@ -180,9 +230,11 @@ Create dictionary to filter DataFrame material properties from material specific
 Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
 """
 function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
-    material_dict = Dict("Spec. No." => x -> x .== spec_no,
-                        "Type/Grade" => x -> x .== type_grade,
-                        "Class/Condition/Temper" => x -> x .== class_condition_temper)
+    material_dict = Dict(
+        "Spec. No." => x -> x .== spec_no,
+        "Type/Grade" => x -> x .== type_grade,
+        "Class/Condition/Temper" => x -> x .== class_condition_temper,
+    )
     return material_dict
 end
 
