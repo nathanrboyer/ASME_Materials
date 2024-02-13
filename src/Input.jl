@@ -17,7 +17,7 @@ function get_user_input()
     tprint("Type/Grade: {dim}(Default: $type_grade_default) {/dim}", highlight=false)
     type_grade = parse_input(String, type_grade_default)
 
-    class_condition_temper_default = "2a"
+    class_condition_temper_default = "2"
     tprint(
         "Class/Condition/Temper: {dim}(Default: $class_condition_temper_default) {/dim}",
         highlight=false,
@@ -54,44 +54,6 @@ function get_user_input()
     tprintln(@style "\nSimulation Parameters" underline cyan)
     tprintln(@style "Enter the following simulation parameters with no special characters or spaces, \
         or press Enter to accept the default value." dim)
-
-    yield_option_default = 1
-    tprint(yield_options())
-    tprint(
-        "Yield Point Calculation Option: {dim}(Default: $yield_option_default) {/dim}",
-        highlight=false,
-    )
-    valid = false
-    local yield_option, overwrite_yield, proportional_limit_default, proportional_limit
-    while valid == false
-        try
-            yield_option = parse_input(Int, yield_option_default)
-        catch
-            yield_option = -1 # Dummy value to reach else branch
-        end
-        if yield_option == 1
-            overwrite_yield = true
-            proportional_limit = KM620.coefficients_table[yield_option, "ϵₚ"]
-            valid = true
-        elseif yield_option == 2
-            overwrite_yield = false
-            proportional_limit = 0.002
-            valid = true
-        elseif yield_option == 3
-            overwrite_yield = true
-            proportional_limit_default = 1E-6
-            tprint(
-                "Proportional Limit Tolerance: {dim}(Default: $proportional_limit_default) {/dim}",
-                highlight=false,
-            )
-            proportional_limit = parse_input(Float64, proportional_limit_default)
-            valid = true
-        else
-            tprint(@style "Invalid option. \
-                Please enter an integer number corresponding to one of the options above: " red)
-        end
-    end
-
     num_output_stress_points_default = 20
     tprint("Number of Plastic Stress-Strain Points: \
         {dim}(Default: $num_output_stress_points_default) {/dim}", highlight=false)
@@ -120,8 +82,6 @@ function get_user_input()
         class_condition_temper,
         KM620_coefficients_table_material_category,
         num_output_stress_points,
-        overwrite_yield,
-        proportional_limit,
         input_file_path,
         output_file_path,
         output_folder,

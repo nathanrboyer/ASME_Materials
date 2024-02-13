@@ -111,7 +111,12 @@ function transform_ASME_tables(
     ss.E_y = elasticity_interp.(ss.T)
     ss.ν = poisson_interp.(ss.T)
 
-    ## Apply KM620 to Stress-Strain Table
+    ## Apply KM-620 to Stress-Strain Table
+        #=
+        True stress σ_t is a vector of equally-spaced points between the proportional limit
+        and the true ultimate tensile stress for every temperature.
+        True total strain ϵ_t is calculated from σ_t using the equations in KM-620.
+        =#
     KM620_gdf = groupby(KM620.coefficients_table, "Material")
     KM620_table_row = KM620_gdf[(KM620_coefficients_table_material_category,)] |> only
     ss.R = KM620.R.(ss.σ_ys, ss.σ_uts)
@@ -144,12 +149,16 @@ function transform_ASME_tables(
     tables["Temperature"] = DataFrame("Temperature (°F)" => tables["Stress-Strain"].T)
 
     ## Build Hardening Tables from Stress-Strain Table
+        #=
+        The first plastic data point (at the proportional limit) is shifted
+        according to KM-620.2 such that the total plastic strain there is identically zero.
+        Zero plastic strain at the first data point is also an ANSYS material requirement.
+        =#
     for (i, temp) in enumerate(tables["Stress-Strain"].T)
         tables["Hardening $(temp)°F"] = DataFrame(
             "Plastic Strain (in in^-1)" => tables["Stress-Strain"][i,"γ_total"],
             "Stress (psi)" => tables["Stress-Strain"][i,"σ_t"],
         )
-        ### Force first plastic strain value to exactly zero. (ANSYS requirement)
         tables["Hardening $(temp)°F"]."Plastic Strain (in in^-1)"[begin] = 0
     end
 

@@ -4,20 +4,11 @@
 Create an informational table from relevant user inputs.
 """
 function make_info_table(;
-        proportional_limit,
         num_output_stress_points,
         KM620_coefficients_table_material_category,
         _...,
     )
     info_table = DataFrame("Variable" => [], "Value" => [], "Description" => [])
-    push!(
-        info_table,
-        (
-            "proportional_limit",
-            proportional_limit,
-            "Minimum Plastic Strain Value to Consider \"Yielded\"",
-        ),
-    )
     push!(
         info_table,
         (
