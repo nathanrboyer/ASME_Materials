@@ -87,29 +87,41 @@
 0.082761556
 ]
 
-user_input = (spec_no = "SA-723",
-                type_grade = "3",
-                class_condition_temper = "2a",
-                KM620_coefficients_table_material_category = "Ferritic steel",
-                num_output_stress_points = 50,
-                overwrite_yield = true,
-                proportional_limit = 2.0e-5,
-                input_file_path = "S:\\Material Properties\\Excel Material Data\\Section II-D Tables.xlsx",
-                output_file_path = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\SA-723-3-2a.xlsx",
-                output_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels",
-                plot_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\Plots",
-                material_string = "SA-723-3-2a",
-                material_dict = Dict("Spec. No." => x -> x .== "SA-723",
-                                    "Type/Grade" => x -> x .== "3",
-                                    "Class/Condition/Temper" => x -> x .== "2a"))
+user_input = (
+    spec_no = "SA-723",
+    type_grade = "3",
+    class_condition_temper = "2a",
+    KM620_coefficients_table_material_category = "Ferritic steel",
+    num_output_stress_points = 50,
+    input_file_path = "S:\\Material Properties\\Excel Material Data\\Section II-D Tables.xlsx",
+    output_file_path = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\SA-723-3-2a.xlsx",
+    output_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels",
+    plot_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\Plots",
+    material_string = "SA-723-3-2a",
+    material_dict = Dict(
+        "Spec. No." => x -> x .== "SA-723",
+        "Type/Grade" => x -> x .== "3",
+        "Class/Condition/Temper" => x -> x .== "2a",
+    )
+)
 ASME_tables, ASME_groups = read_ASME_tables(user_input)
 ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
-fig5 = Figure()
-axis5 = Axis(fig5[1,1], title = "SA-723 Grade 3 Class 2a at 200°F", xlabel = "Plastic Strain (in in^-1)", ylabel = "Stress (psi)")
-scatterlines!(ANSYS_tables["Hardening 200°F"]."Plastic Strain (in in^-1)", ANSYS_tables["Hardening 200°F"]."Stress (psi)", label = "Nathan")
-scatterlines!(ϵ_michael_200, σ_michael_200, label = "Michael")
-Legend(fig5[1,2], axis5, "Author")
-display(fig5)
-save(joinpath(user_input.plot_folder,"Verification.png"), fig5)
-save(joinpath(pwd(), "Verification.png"), fig5)
+fig = Figure()
+axis = Axis(
+    fig[1,1],
+    title = "SA-723 Grade 3 Class 2a at 200°F",
+    xlabel = "Plastic Strain (in in^-1)",
+    ylabel = "Stress (psi)",
+)
+scatterlines!(
+    axis,
+    ANSYS_tables["Hardening 200°F"]."Plastic Strain (in in^-1)",
+    ANSYS_tables["Hardening 200°F"]."Stress (psi)",
+    label = "Nathan",
+)
+scatterlines!(axis, ϵ_michael_200, σ_michael_200, label = "Michael")
+Legend(fig[1,2], axis, "Author")
+display(fig)
+save(joinpath(user_input.plot_folder,"Verification.png"), fig)
+save(joinpath(pwd(), "Verification.png"), fig)

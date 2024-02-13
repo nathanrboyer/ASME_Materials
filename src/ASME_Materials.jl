@@ -103,11 +103,11 @@ Collection of all inputs and outputs from the `main` process.
     output of `plot_ANSYS_tables` function
     - "Thermal Conductivity"
     - "Thermal Expansion"
-    - "Young's Modulus"
-    - "Plastic Strain"
+    - "Elasticity"
+    - "Stress Strain"
     - "Yield Strength"
     - "Ultimate Strength"
-    - "Elastic Perfectly-Plastic" (Stabilized EPP Stress-Strain Curve)
+    - "EPP Stress Strain" (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
 """
 struct ASME_Materials_Data
     user_input::NamedTuple
@@ -150,7 +150,7 @@ function main(user_input::NamedTuple)
 
     tprintln(@style "Plotting results ..." cyan italic)
     ANSYS_figures = plot_ANSYS_tables(ANSYS_tables, user_input)
-    display(ANSYS_figures["Plastic Strain"])
+    display(ANSYS_figures["Stress Strain"])
 
     print("\n", goodbye_message(user_input.output_file_path))
 

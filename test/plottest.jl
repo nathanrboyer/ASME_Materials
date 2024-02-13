@@ -1,27 +1,31 @@
-user_input = (spec_no = "SA-723",
-                type_grade = "3",
-                class_condition_temper = "2a",
-                KM620_coefficients_table_material_category = "Ferritic steel",
-                num_output_stress_points = 50,
-                overwrite_yield = true,
-                proportional_limit = 2.0e-5,
-                input_file_path = "S:\\Material Properties\\Excel Material Data\\Section II-D Tables.xlsx",
-                output_file_path = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\SA-723-3-2a.xlsx",
-                output_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels",
-                plot_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\Plots",
-                material_string = "SA-723-3-2a",
-                material_dict = Dict("Spec. No." => x -> x .== "SA-723",
-                                    "Type/Grade" => x -> x .== "3",
-                                    "Class/Condition/Temper" => x -> x .== "2a"))
+user_input = (
+    spec_no = "SA-723",
+    type_grade = "3",
+    class_condition_temper = "2",
+    KM620_coefficients_table_material_category = "Ferritic steel",
+    num_output_stress_points = 20,
+    input_file_path = "S:\\Material Properties\\Excel Material Data\\Section II-D Tables.xlsx",
+    output_file_path = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\SA-723-3-2a.xlsx",
+    output_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels",
+    plot_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\Plots",
+    material_string = "SA-723-3-2",
+    material_dict = Dict(
+        "Spec. No." => x -> x .== "SA-723",
+        "Type/Grade" => x -> x .== "3",
+        "Class/Condition/Temper" => x -> x .== "2",
+    )
+)
 ASME_tables, ASME_groups = read_ASME_tables(user_input)
 ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
-fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input)
-fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)
-fig_tc, fig_te, fig_ym, fig_ps, fig_epp = plot_ANSYS_tables(ANSYS_tables, user_input.material_string)
+figures = plot_ANSYS_tables(ANSYS_tables, user_input)
+figures = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)
+figures = plot_ANSYS_tables(ANSYS_tables, user_input.material_string)
 
-display(fig_tc)
-display(fig_te)
-display(fig_ym)
-display(fig_ps)
-display(fig_epp)
+display(figures["Thermal Conductivity"])
+display(figures["Thermal Expansion"])
+display(figures["Elasticity"])
+display(figures["Stress Strain"])
+display(figures["Yield Strength"])
+display(figures["Ultimate Strength"])
+display(figures["EPP Stress Strain"])
