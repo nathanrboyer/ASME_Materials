@@ -128,9 +128,7 @@ function transform_ASME_tables(
     ss.A_1 = KM620.A_1.(ss.σ_ys, ss.ϵ_ys, ss.m_1)
     ss.A_2 = KM620.A_2.(ss.σ_uts, ss.m_2)
     ss.σ_utst = KM620.σ_utst.(ss.σ_uts, ss.m_2)
-
-    ss.σ_p = find_proportional_limit(ss) # TODO: Switch to NonlinearSolve.jl for root finding.
-
+    ss.σ_p = find_proportional_limit(ss)
     rowiterator = 1:nrow(ss)
     ss.σ_t = [range(
         start = ss.σ_p[i],
@@ -267,12 +265,12 @@ function get_row_data(table::DataFrame, conditions::Dict)
 end
 
 """
-    find_proportional_limit(table::DataFrame) -> σ_p::Vector
+    find_proportional_limit_old(table::DataFrame) -> σ_p::Vector
 
 Calulates the stress `σ_p` at the stress-strain proportional limit `ϵ_p`
 for every temperature in the `table`.
 """
-function find_proportional_limit(table::DataFrame)
+function find_proportional_limit_old(table::DataFrame)
     local numpoints = nrow(table) # Number of discrete temperature points.
     local σ_increment = 0.1 # Stress increment (resolution) for the while loop (psi).
     local σ_p = fill(0.0, numpoints) # Initialize output vector.
@@ -298,5 +296,73 @@ function find_proportional_limit(table::DataFrame)
         end
         σ_p[i] = σ_t - σ_increment
     end
+    return σ_p
+end
+
+"""
+    find_proportional_limit(table) -> σ_p
+    find_proportional_limit(table, searchrange) -> σ_p
+
+Finds the stress value `σ_p` where true strain `ϵ_ts` becomes nonlinear
+and plasticity begins (`γ_1 + γ_2 == ϵ_p`) for each temperature in the input `table`.
+
+# Arguments
+- `table::DataFrame`: material data table
+    - rows: material temperature
+    - columns: material parameters
+- `searchrange::Tuple{T, T} where T<:Number`: optional argument to change the search range for `σ_p`.
+    Defaults to `(1.0, 1e6)`.
+
+# Results
+- `σ_p::Vector{Float64}`: stress values at the proportional limit for each input material temperature
+"""
+function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6))
+
+    @assert((length(searchrange) == 2) && (typeof(first(searchrange)) == typeof(last(searchrange))),
+      "`searchrange` must be a two-element `Tuple` where each element is the same type `T<:Number`")
+
+    # Define the non-linear function to be solved.
+    function f(u, p)
+        # Solution Variable
+        σ_t = u
+
+        # Parameters
+        σ_ys = p[1]
+        σ_uts = p[2]
+        K = p[3]
+        m_1 = p[4]
+        m_2 = p[5]
+        A_1 = p[6]
+        A_2 = p[7]
+        ϵ_p = p[8]
+
+        # Equations
+        H = KM620.H(σ_t, σ_ys, σ_uts, K)
+        ϵ_1 = KM620.ϵ_1(σ_t, A_1, m_1)
+        ϵ_2 = KM620.ϵ_2(σ_t, A_2, m_2)
+        γ_1 = KM620.γ_1(ϵ_1, H)
+        γ_2 = KM620.γ_2(ϵ_2, H)
+
+        return γ_1 + γ_2 - ϵ_p  # = 0 (Eq. KM-620.2)
+    end
+
+    # Find the root of the f function for each temperature in the data frame.
+    σ_p = Float64[]
+    for row in eachrow(table)
+        p = [
+            row.σ_ys,
+            row.σ_uts,
+            row.K,
+            row.m_1,
+            row.m_2,
+            row.A_1,
+            row.A_2,
+            row.ϵ_p,
+        ]
+        problem = IntervalNonlinearProblem(f, searchrange, p)
+        solution = solve(problem)
+        push!(σ_p, solution.u)
+    end
+
     return σ_p
 end

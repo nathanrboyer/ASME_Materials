@@ -1,7 +1,7 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, Term, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, SimpleNonlinearSolve, Term, XLSX
 import KM620
 
 # Export Function Names
