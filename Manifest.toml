@@ -857,7 +857,7 @@ version = "3.0.1+0"
 
 [[deps.KM620]]
 deps = ["CSV", "DataFrames", "LaTeXStrings", "Latexify"]
-git-tree-sha1 = "9c7b2c91dac881ce5145f6ac6c32e507c887d027"
+git-tree-sha1 = "2a02d19ddf5e3c40c768a3841aa7f69c6438cec2"
 repo-rev = "master"
 repo-url = "https://github.com/nathanrboyer/KM620.jl.git"
 uuid = "0ccbab1c-04f8-4773-914b-89ad8e9d3a96"
@@ -1118,9 +1118,9 @@ version = "2.28.2+1"
 
 [[deps.MeshIO]]
 deps = ["ColorTypes", "FileIO", "GeometryBasics", "Printf"]
-git-tree-sha1 = "8be09d84a2d597c7c0c34d7d604c039c9763e48c"
+git-tree-sha1 = "8c26ab950860dfca6767f2bbd90fdf1e8ddc678b"
 uuid = "7269a6da-0436-5bbc-96c2-40638cbb6118"
-version = "0.4.10"
+version = "0.4.11"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
@@ -1580,9 +1580,9 @@ version = "0.1.0"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FillArrays", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "TruncatedStacktraces"]
-git-tree-sha1 = "850d187a1123683aa7e593d474155e132584fb78"
+git-tree-sha1 = "a123011b1711f3449bc4e5d66746be5725af92fd"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.24.0"
+version = "2.26.0"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -1730,9 +1730,9 @@ weakdeps = ["ChainRulesCore"]
 
 [[deps.StableHashTraits]]
 deps = ["Compat", "PikaParser", "SHA", "Tables", "TupleTools"]
-git-tree-sha1 = "662f56ffe22b3985f3be7474f0aecbaf214ecf0f"
+git-tree-sha1 = "10dc702932fe05a0e09b8e5955f00794ea1e8b12"
 uuid = "c5dd0088-6c3f-4803-b00e-f31a60c170fa"
-version = "1.1.6"
+version = "1.1.8"
 
 [[deps.StackViews]]
 deps = ["OffsetArrays"]
@@ -1832,9 +1832,9 @@ uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
 version = "7.2.1+1"
 
 [[deps.SymbolicIndexingInterface]]
-git-tree-sha1 = "b3103f4f50a3843e66297a2456921377c78f5e31"
+git-tree-sha1 = "dc7186d456f9ff2bef0cb754a59758920f0b2382"
 uuid = "2efcf032-c050-4f8e-a9bb-153293bab1f5"
-version = "0.3.5"
+version = "0.3.6"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1912,9 +1912,9 @@ uuid = "781d530d-4396-4725-bb49-402e4bee1e77"
 version = "1.4.0"
 
 [[deps.TupleTools]]
-git-tree-sha1 = "155515ed4c4236db30049ac1495e2969cc06be9d"
+git-tree-sha1 = "41d61b1c545b06279871ef1a4b5fcb2cac2191cd"
 uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
-version = "1.4.3"
+version = "1.5.0"
 
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]

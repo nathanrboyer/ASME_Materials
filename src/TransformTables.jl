@@ -271,6 +271,8 @@ end
 Finds the stress value `σ_p` where true strain `ϵ_ts` becomes nonlinear
 and plasticity begins (`γ_1 + γ_2 == ϵ_p`) for each temperature row in the input `table`.
 
+This is done by finding the root of the function `KM620.plasticity` with NonlinearSolve.jl.
+
 # Arguments
 - `table::DataFrame`: material data table
     - rows: material temperature
@@ -282,34 +284,16 @@ and plasticity begins (`γ_1 + γ_2 == ϵ_p`) for each temperature row in the in
 - `σ_p::Vector{Float64}`: stress values at the proportional limit for each input material temperature
 """
 function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6))
-
-    @assert((length(searchrange) == 2) && (typeof(first(searchrange)) == typeof(last(searchrange))),
-      "`searchrange` must be a two-element `Tuple` where each element is the same type `T<:Number`")
-
-    # Define the nonlinear function to be solved.
-    function f(u, p)
-        # Inputs
-        σ_t = u  # Solution Variable
-        (; σ_ys, σ_uts, K, m_1, m_2, A_1, A_2, ϵ_p) = p  # Parameters
-
-        # Equations
-        H = KM620.H(σ_t, σ_ys, σ_uts, K)
-        ϵ_1 = KM620.ϵ_1(σ_t, A_1, m_1)
-        ϵ_2 = KM620.ϵ_2(σ_t, A_2, m_2)
-        γ_1 = KM620.γ_1(ϵ_1, H)
-        γ_2 = KM620.γ_2(ϵ_2, H)
-
-        return γ_1 + γ_2 - ϵ_p  # = 0 (Eq. KM-620.2)
-    end
-
-    # Find the root of the `f` function for each material temperature in the data frame.
+    @assert(
+        (length(searchrange) == 2) && (typeof(first(searchrange)) == typeof(last(searchrange))),
+        "`searchrange` must be a `Tuple{T,T} where T<:Number` (two elements of the same type)"
+    )
     σ_p = Float64[]
-    problem = IntervalNonlinearProblem(f, searchrange)
+    problem = IntervalNonlinearProblem(KM620.plasticity, searchrange)
     for row in eachrow(table)
         problem = remake(problem, p=row)
         solution = solve(problem)
         push!(σ_p, solution.u)
     end
-
     return σ_p
 end

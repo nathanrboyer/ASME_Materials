@@ -11,10 +11,10 @@ Plots ANSYS `tables`, titles figures with `material_string`, and saves figures t
 - Thermal Conductivity
 - Thermal Expansion
 - Elasticity
-- Stress Strain
+- Stress-Strain
 - Yield Strength
 - Ultimate Strength
-- EPP Stress Strain (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
+- EPP Stress-Strain (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
 """
 function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder::String = pwd())
     mkpath(output_folder)
@@ -126,10 +126,10 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
         "Thermal Conductivity" => fig1,
         "Thermal Expansion" => fig2,
         "Elasticity" => fig3,
-        "Stress Strain" => fig4,
+        "Stress-Strain" => fig4,
         "Yield Strength" => fig5,
         "Ultimate Strength" => fig6,
-        "EPP Stress Strain" => fig7,
+        "EPP Stress-Strain" => fig7,
     )
     return figures
 end
@@ -144,10 +144,10 @@ and saves figures to `user_input.plot_folder`.
 - Thermal Conductivity
 - Thermal Expansion
 - Elasticity
-- Stress Strain
+- Stress-Strain
 - Yield Strength
 - Ultimate Strength
-- EPP Stress Strain (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
+- EPP Stress-Strain (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
 """
 function plot_ANSYS_tables(tables::Dict, user_input::NamedTuple)
     material_string = user_input.material_string
