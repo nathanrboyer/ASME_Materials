@@ -265,46 +265,11 @@ function get_row_data(table::DataFrame, conditions::Dict)
 end
 
 """
-    find_proportional_limit_old(table::DataFrame) -> σ_p::Vector
-
-Calulates the stress `σ_p` at the stress-strain proportional limit `ϵ_p`
-for every temperature in the `table`.
-"""
-function find_proportional_limit_old(table::DataFrame)
-    local numpoints = nrow(table) # Number of discrete temperature points.
-    local σ_increment = 0.1 # Stress increment (resolution) for the while loop (psi).
-    local σ_p = fill(0.0, numpoints) # Initialize output vector.
-    for i in 1:numpoints
-        local σ_ys = table.σ_ys[i]
-        local σ_uts = table.σ_uts[i]
-        local K = table.K[i]
-        local m_1 = table.m_1[i]
-        local m_2 = table.m_2[i]
-        local A_1 = table.A_1[i]
-        local A_2 = table.A_2[i]
-        local ϵ_p = table.ϵ_p[i]
-        local σ_t = 0.0
-        local γ_total = 0.0
-        while γ_total <= ϵ_p
-            σ_t += σ_increment
-            local H = KM620.H.(σ_t, σ_ys, σ_uts, K)
-            local ϵ_1 = KM620.ϵ_1.(σ_t, A_1, m_1)
-            local ϵ_2 = KM620.ϵ_2.(σ_t, A_2, m_2)
-            local γ_1 = KM620.γ_1.(ϵ_1, H)
-            local γ_2 = KM620.γ_2.(ϵ_2, H)
-            γ_total = γ_1 + γ_2
-        end
-        σ_p[i] = σ_t - σ_increment
-    end
-    return σ_p
-end
-
-"""
     find_proportional_limit(table) -> σ_p
     find_proportional_limit(table, searchrange) -> σ_p
 
 Finds the stress value `σ_p` where true strain `ϵ_ts` becomes nonlinear
-and plasticity begins (`γ_1 + γ_2 == ϵ_p`) for each temperature in the input `table`.
+and plasticity begins (`γ_1 + γ_2 == ϵ_p`) for each temperature row in the input `table`.
 
 # Arguments
 - `table::DataFrame`: material data table
@@ -321,20 +286,11 @@ function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6)
     @assert((length(searchrange) == 2) && (typeof(first(searchrange)) == typeof(last(searchrange))),
       "`searchrange` must be a two-element `Tuple` where each element is the same type `T<:Number`")
 
-    # Define the non-linear function to be solved.
+    # Define the nonlinear function to be solved.
     function f(u, p)
-        # Solution Variable
-        σ_t = u
-
-        # Parameters
-        σ_ys = p[1]
-        σ_uts = p[2]
-        K = p[3]
-        m_1 = p[4]
-        m_2 = p[5]
-        A_1 = p[6]
-        A_2 = p[7]
-        ϵ_p = p[8]
+        # Inputs
+        σ_t = u  # Solution Variable
+        (; σ_ys, σ_uts, K, m_1, m_2, A_1, A_2, ϵ_p) = p  # Parameters
 
         # Equations
         H = KM620.H(σ_t, σ_ys, σ_uts, K)
@@ -346,20 +302,11 @@ function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6)
         return γ_1 + γ_2 - ϵ_p  # = 0 (Eq. KM-620.2)
     end
 
-    # Find the root of the f function for each temperature in the data frame.
+    # Find the root of the `f` function for each material temperature in the data frame.
     σ_p = Float64[]
+    problem = IntervalNonlinearProblem(f, searchrange)
     for row in eachrow(table)
-        p = [
-            row.σ_ys,
-            row.σ_uts,
-            row.K,
-            row.m_1,
-            row.m_2,
-            row.A_1,
-            row.A_2,
-            row.ϵ_p,
-        ]
-        problem = IntervalNonlinearProblem(f, searchrange, p)
+        problem = remake(problem, p=row)
         solution = solve(problem)
         push!(σ_p, solution.u)
     end
