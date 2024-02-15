@@ -25,6 +25,7 @@ function get_user_input()
     class_condition_temper = parse_input(String, class_condition_temper_default)
 
     KM620_coefficients_table_material_category_number_default = 1
+    tprintln("")
     tprint(tableKM620_options())
     tprint(
         "Table KM-620 Material Category: \
@@ -117,6 +118,29 @@ Returns a terminal panel with the material information from Table KM-620.
 Call `print` or `println` on the result to diplay it.
 """
 function tableKM620_options()
+    table = select(KM620.coefficients_table, "Material")
+    notes = join(values(metadata(KM620.coefficients_table)), "\n")
+    panel = @nested_panels Panel(
+        Term.Table(
+            hcat(1:nrow(table), table."Material"),
+            style = "cyan",
+            header = ["Category", "Material"],
+            header_style = "default",
+            columns_style = "dim",
+            columns_justify = :left,
+            box = :ROUNDED,
+        ),
+        Panel(
+            @style(notes, "dim"),
+            title = "Note",
+            style = "cyan",
+        ),
+        title = "Table KM-620 Material Categories",
+        style = "cyan",
+    )
+    return panel
+end
+function tableKM620_options_old()
     option_text = RenderableText(
         join(KM620.coefficients_table."Material", "\n"),
         style = "dim",
@@ -135,7 +159,6 @@ function tableKM620_options()
         note_text,
         title = "Note",
         style = "cyan",
-        fit = true,
     )
     top_text = TextBox(
         option_numbers * " " * vline * " " * option_text,
@@ -145,35 +168,6 @@ function tableKM620_options()
         top_text / note_panel,
         title = "Table KM-620 Material Categories",
         style = "cyan",
-        fit = true,
-    )
-    return options_panel
-end
-
-"""
-    yield_options()
-
-Returns a terminal panel with the yield strain calculation options.
-Call `print` or `println` on the result to diplay it.
-"""
-function yield_options()
-    option_text = RenderableText(
-        "Use ϵₚ from Table KM-620 as the proportional limit tolerance at yield.\n" *
-        "Use 0.2% engineering offset strain as the proportional limit tolerance at yield.\n" *
-        "Specify my own proportional limit tolerance at yield.",
-        style = "dim",
-    )
-    option_numbers = RenderableText(
-        join(string.(collect(1:option_text.measure.h)), "\n"),
-        style = "dim",
-    )
-    vline = vLine(option_numbers, style = "cyan")
-    options_panel = Panel(
-        option_numbers * " " * vline * " " * option_text,
-        title = "Yield Point Calculation Options",
-        style = "cyan",
-        padding = (5, 5, 1, 1),
-        fit = true,
     )
     return options_panel
 end

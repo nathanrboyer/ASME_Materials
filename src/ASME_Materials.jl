@@ -21,34 +21,56 @@ include("PlotTables.jl")
 const increase_in_strength = 0.05 # 5%
 const increase_in_plastic_strain = 0.20 # 20%
 
+# Display Welcome Message When Package Loads
+__init__() = welcome_message()
+
 # Welcome Message
-function __init__()
-    @info("""You have just loaded the ASME_Materials package!
-    \tEnsure the material you need has been added to every sheet of the file `Section II-D Tables.xlsx`.
-    \tThen type `main()` and press Enter.
-    """)
+function welcome_message()
+    message = "\n" *
+        "You have just loaded the {cyan}ASME_Materials{/cyan} package!\n\n" *
+        "Ensure the material you need has been added \
+        to every sheet of the file {italic dim}Section II-D Tables.xlsx.{/italic dim} \
+        Then type {cyan}main(){/cyan} next to the {green}julia>{/green} prompt and press Enter.\n"
+    welcome_panel = Panel(
+        message,
+        title = "Julia Package Instructions",
+        title_style = "bold",
+        title_justify = :center,
+        style = "cyan",
+    )
+    return welcome_panel
 end
 
 # Goodbye Message
-function goodbye_message(output_file_path)
+function goodbye_message(output_file_path=nothing)
+    if output_file_path == nothing
+        text = "the output Excel file"
+    else
+        text = "{italic dim}$output_file_path{/italic dim}"
+    end
+    message =
+        """
+
+        1. Open {cyan}Engineering Data{/cyan} in {cyan}ANSYS Workbench{/cyan}.
+        2. Ensure {cyan}Units{/cyan} in the menu bar are set to {cyan}U.S. Customary{/cyan}.
+        3. Click on {cyan}Engineering Data Sources{/cyan} under the {cyan}Engineering Data{/cyan} tab.
+        4. Click the check box next to the appropriate {cyan}Data Source{/cyan} to edit it.
+        5. Add and name a new material.
+        6. For every sheet in $text:
+          a. Add the property to the new ANSYS material that matches the Excel sheet name.
+          b. Copy and paste the Excel sheet data into the matching empty ANSYS table.
+        7. Click the {cyan}Save{/cyan} button next to the {cyan}Data Source{/cyan} checkbox.
+        """
     goodbye_panel = Panel(
-        "1. Open {cyan}Engineering Data{/cyan} in {cyan}ANSYS Workbench{/cyan}.\n" *
-        "2. Ensure {cyan}Units{/cyan} in the menu bar are set to {cyan}U.S. Customary{/cyan}.\n" *
-        "3. Click on {cyan}Engineering Data Sources{/cyan} under the {cyan}Engineering Data{/cyan} tab.\n" *
-        "4. Click the check box next to the appropriate {cyan}Data Source{/cyan} to edit it.\n" *
-        "5. Add and name a new material.\n" *
-        "6. For every sheet in {cyan}$output_file_path{/cyan}:\n" *
-        "    a. Add the property to the new ANSYS material that matches the Excel sheet name.\n" *
-        "    b. Copy and paste the Excel sheet data into the matching empty ANSYS table.\n" *
-        "7. Click the {cyan}Save{/cyan} button next to the {cyan}Data Source{/cyan} checkbox.",
+        message,
         title = "ANSYS Workbench Instructions",
         title_style = "bold",
         title_justify = :center,
         style = "cyan",
-        fit = true
     )
     return goodbye_panel
 end
+goodbye_message() = goodbye_message("the output Excel file")
 
 # Output Struct
 """
