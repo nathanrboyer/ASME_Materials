@@ -22,7 +22,7 @@ const increase_in_strength = 0.05 # 5%
 const increase_in_plastic_strain = 0.20 # 20%
 
 # Display Welcome Message When Package Loads
-__init__() = welcome_message()
+__init__() = println(welcome_message())
 
 # Welcome Message
 function welcome_message()
@@ -70,7 +70,6 @@ function goodbye_message(output_file_path=nothing)
     )
     return goodbye_panel
 end
-goodbye_message() = goodbye_message("the output Excel file")
 
 # Output Struct
 """
