@@ -77,6 +77,7 @@ function get_user_input()
     output_file_path = joinpath(output_folder, material_string*".xlsx")
     plot_folder = joinpath(output_folder, "Plots")
 
+    # Collect into `NamedTuple`
     user_input = (;
         spec_no,
         type_grade,
@@ -89,8 +90,7 @@ function get_user_input()
         plot_folder,
         material_string,
         material_dict,
-    ) # NamedTuple collection of all user inputs
-
+    )
     return user_input
 end
 
@@ -123,53 +123,24 @@ function tableKM620_options()
     panel = @nested_panels Panel(
         Term.Table(
             hcat(1:nrow(table), table."Material"),
-            style = "cyan",
             header = ["Category", "Material"],
-            header_style = "default",
-            columns_style = "dim",
-            columns_justify = :left,
+            header_style = "cyan",
+            columns_justify = [:center, :left],
+            columns_style = "default",
             box = :ROUNDED,
+            style = "cyan",
         ),
         Panel(
-            @style(notes, "dim"),
+            @style(notes, "cyan dim italic"),
+            style = "cyan dim italic",
             title = "Note",
-            style = "cyan",
+            title_style = "cyan dim italic",
         ),
         title = "Table KM-620 Material Categories",
+        title_style = "cyan",
         style = "cyan",
     )
     return panel
-end
-function tableKM620_options_old()
-    option_text = RenderableText(
-        join(KM620.coefficients_table."Material", "\n"),
-        style = "dim",
-    )
-    option_numbers = RenderableText(
-        join(string.(collect(1:option_text.measure.h)), "\n"),
-        style = "dim",
-    )
-    vline = vLine(option_numbers, style = "cyan")
-    note_text = RenderableText(
-        "Ferritic steel includes carbon, low alloy, and alloy steels,\n" *
-        "and ferritic, martensitic, and iron-based age-hardening stainless steels.",
-        style = "dim",
-    )
-    note_panel = Panel(
-        note_text,
-        title = "Note",
-        style = "cyan",
-    )
-    top_text = TextBox(
-        option_numbers * " " * vline * " " * option_text,
-        padding = (2, 0, 0, 0),
-    )
-    options_panel = Panel(
-        top_text / note_panel,
-        title = "Table KM-620 Material Categories",
-        style = "cyan",
-    )
-    return options_panel
 end
 
 """
