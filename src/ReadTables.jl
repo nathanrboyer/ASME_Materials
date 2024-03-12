@@ -43,11 +43,15 @@ function read_ASME_tables(filepath::String, material_dict::Dict)
     tables["TM"] = readtable(filepath, "Table TM-1")
     tables["PRD"] = readtable(filepath, "Table PRD")
 
-    # Ensure Identifier Columns Contain Only Strings
-    transform!(tables["Y"], "Type/Grade" => ByRow(string), renamecols=false)
-    transform!(tables["Y"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
-    transform!(tables["U"], "Type/Grade" => ByRow(string), renamecols=false)
-    transform!(tables["U"], "Class/Condition/Temper" => ByRow(string), renamecols=false)
+    # Ensure Identifier Columns Contain Only Strings (Change Empty Identifier Cells to Underscores)
+    function clean_identifiers(column)
+        replace!(column, missing => "_")
+        column = string.(column)
+    end
+    transform!(tables["Y"], "Type/Grade" => clean_identifiers, renamecols=false)
+    transform!(tables["Y"], "Class/Condition/Temper" => clean_identifiers, renamecols=false)
+    transform!(tables["U"], "Type/Grade" => clean_identifiers, renamecols=false)
+    transform!(tables["U"], "Class/Condition/Temper" => clean_identifiers, renamecols=false)
 
     # Ensure All Dashes are Normal Hypens
     dash_to_hyphen(x) = eltype(x)<:AbstractString ? replace.(x, '–'=>'-', '—'=>'-') : x
@@ -57,8 +61,13 @@ function read_ASME_tables(filepath::String, material_dict::Dict)
 
     # Find Chemical Composition
     nomcomp = subset(tables["Y"], material_dict...)."Nominal Composition" |> only
+    alloy = subset(tables["Y"], material_dict...)."Alloy Desig./UNS No." |> only
     groups = Dict{String, String}()
-    groups["TM"] = findgroup(tables["TMkey"], nomcomp)
+    if nomcomp == "Carbon steel"  # Carbon steel has two different groups in table TM, so must categorize by alloy designation instead.
+        groups["TM"] = findgroup(tables["TMkey"], alloy)
+    else
+        groups["TM"] = findgroup(tables["TMkey"], nomcomp)
+    end
     groups["PRD"] = findgroup(tables["PRDkey"], nomcomp)
     groups["TE"] = findgroup(tables["TEkey"], nomcomp)
     groups["TCD"] = findgroup(tables["TCDkey"], nomcomp)

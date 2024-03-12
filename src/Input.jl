@@ -7,7 +7,8 @@ function get_user_input()
     # Material Specification
     tprintln(@style "Material Information" underline cyan)
     tprintln(@style "Enter the following material information with no special characters or spaces, \
-        or press Enter to accept the default value." dim)
+        or press Enter to accept the default value. \
+        If a value does not exist, enter an underscore." dim)
 
     spec_no_default = "SA-723"
     tprint("Specification Number: {dim}(Default: $spec_no_default) {/dim}", highlight=false)
