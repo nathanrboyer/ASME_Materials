@@ -14,10 +14,7 @@ Find table group from key table.
 """
 function findgroup(df::DataFrame, value)
     for group in names(df)
-        if first(df[:, group]) === missing
-            continue
-        end
-        if value in df[:, group]
+        if value in skipmissing(df[:, group])
             return group
         end
     end
