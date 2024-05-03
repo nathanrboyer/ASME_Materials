@@ -171,7 +171,6 @@ function main(user_input::NamedTuple)
 
     tprintln(@style "Plotting results ..." cyan italic)
     ANSYS_figures = plot_ANSYS_tables(ANSYS_tables, user_input)
-    display(ANSYS_figures["Stress-Strain"])
 
     print("\n", goodbye_message(user_input.output_file_path))
 
