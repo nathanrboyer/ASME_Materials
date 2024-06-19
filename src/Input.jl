@@ -59,7 +59,7 @@ function get_user_input()
     num_output_stress_points_default = 20
     tprint("Number of Plastic Stress-Strain Points: \
         {dim}(Default: $num_output_stress_points_default) {/dim}", highlight=false)
-    num_output_stress_points = parse_input(Int, num_output_stress_points_default)
+    num_plastic_points = parse_input(Int, num_output_stress_points_default)
 
     # Files
     tprintln(@style "\nSelect the appropriate file location." underline cyan)
@@ -84,7 +84,7 @@ function get_user_input()
         type_grade,
         class_condition_temper,
         KM620_coefficients_table_material_category,
-        num_output_stress_points,
+        num_plastic_points,
         input_file_path,
         output_file_path,
         output_folder,

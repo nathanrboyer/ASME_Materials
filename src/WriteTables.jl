@@ -4,7 +4,7 @@
 Create an informational table from relevant user inputs.
 """
 function make_info_table(;
-        num_output_stress_points,
+        num_plastic_points,
         KM620_coefficients_table_material_category,
         _...,
     )
@@ -12,8 +12,8 @@ function make_info_table(;
     push!(
         info_table,
         (
-            "num_output_stress_points",
-            num_output_stress_points,
+            "num_plastic_points",
+            num_plastic_points,
             "Number of Plastic Stress-Strain Data Points",
         ),
     )
@@ -70,7 +70,7 @@ end
     write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)
 
 Writes ANSYS `tables` to an Excel file using information specified in `user_input`.
-`output_file_path`, `proportional_limit`, `num_output_stress_points`,
+`output_file_path`, `proportional_limit`, `num_plastic_points`,
 and `KM620_coefficients_table_material_category` must be present in `user_input`.
 """
 function write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)

@@ -43,7 +43,7 @@ end
 
 # Goodbye Message
 function goodbye_message(output_file_path=nothing)
-    if output_file_path == nothing
+    if output_file_path === nothing
         text = "the output Excel file"
     else
         text = "{italic dim}$output_file_path{/italic dim}"
@@ -83,7 +83,7 @@ Collection of all inputs and outputs from the `main` process.
     - :type_grade
     - :class_condition_temper
     - :KM620_coefficients_table_material_category
-    - :num_output_stress_points
+    - :num_plastic_points
     - :overwrite_yield
     - :proportional_limit
     - :input_file_path
