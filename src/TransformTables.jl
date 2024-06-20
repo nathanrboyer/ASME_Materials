@@ -48,9 +48,9 @@ function transform_ASME_tables(
     for row in eachrow(master_table)
         ANSYS_tables["Hardening $(row.T)°F"] = transform_plasticity(row)
     end
-    ANSYS_tables["EPP"] = transform_plasticity_perfectly(ANSYS_tables["Yield Strength"])
+    ANSYS_tables["EPP"] = transform_perfect_plasticity(ANSYS_tables["Yield Strength"])
 
-    return ANSYS_tables
+    return ANSYS_tables, master_table
 end
 transform_ASME_tables(
     ASME_tables::Dict{String,DataFrame},
@@ -61,6 +61,7 @@ transform_ASME_tables(
     ASME_groups::Dict{String,String};
     user_input..., # Splat user_input into keyword arguments.
 ) # allows `user_input` to be passed without splatting it into keyword arguments
+export transform_ASME_tables
 
 """
     get_numeric_headers(table::DataFrame) -> numeric_headers::Vector{Int}
@@ -79,6 +80,7 @@ function get_numeric_headers(table::DataFrame)
     end
     return numeric_headers
 end
+export get_numeric_headers
 
 """
     get_row_data(table::DataFrame, conditions::Dict) -> row_data::Vector
@@ -93,9 +95,8 @@ e.g. Dict("Column Name" => (x -> x .== cellvalue)).
 function get_row_data(table::DataFrame, conditions::Dict, returncolumns)
     subset(table, conditions...)[:,string.(returncolumns)] |> only |> Vector
 end
-function get_row_data(table::DataFrame, conditions::Dict)
-    subset(table, conditions...) |> only |> Vector
-end
+get_row_data(table::DataFrame, conditions::Dict) = subset(table, conditions...) |> only |> Vector
+export get_row_data
 
 """
     find_proportional_limit(table) -> σ_p
@@ -130,6 +131,7 @@ function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6)
     end
     return σ_p
 end
+export find_proportional_limit
 
 """
     read_PRD(ASME_tables, ASME_groups)
@@ -434,7 +436,7 @@ transform_plasticity(master_table::DataFrame) = Dict(
 export transform_plasticity
 
 """
-    transform_plasticity_perfectly(yield_table)
+    transform_perfect_plasticity(yield_table)
 
 Create elastic perfectly plastic (EPP) trilinear kinematic hardening tables for ANSYS
 from the data in `yield_table`.
@@ -449,7 +451,7 @@ E_t is the slope in the stabilized portion of the plastic region,
 and 0 is the slope in the unstabilized portion of the plastic region.
 The second datapont can be deleted to implement a true perfectly plastic material model.
 """
-function transform_plasticity_perfectly(yield_table)
+function transform_perfect_plasticity(yield_table)
 
     # Extract data from `yield_table`.
     T = yield_table."Temperature (°F)"      # Temperature Values
@@ -486,4 +488,4 @@ function transform_plasticity_perfectly(yield_table)
 
     return df
 end
-export transform_plasticity_perfectly
+export transform_perfect_plasticity

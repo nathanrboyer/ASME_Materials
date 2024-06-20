@@ -4,12 +4,6 @@ module ASME_Materials
 using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, SimpleNonlinearSolve, Term, XLSX
 import KM620
 
-# Export Function Names
-export ASME_Materials_Data, main, get_user_input,
-       read_ASME_tables, transform_ASME_tables, write_ANSYS_tables,
-       save_user_input, plot_ANSYS_tables, find_proportional_limit,
-       make_material_dict, goodbye_message
-
 # Define Functions
 include("Input.jl")
 include("ReadTables.jl")
@@ -40,6 +34,7 @@ function welcome_message()
     )
     return welcome_panel
 end
+export welcome_message
 
 # Goodbye Message
 function goodbye_message(output_file_path=nothing)
@@ -70,6 +65,7 @@ function goodbye_message(output_file_path=nothing)
     )
     return goodbye_panel
 end
+export goodbye_message
 
 # Output Struct
 """
@@ -114,7 +110,6 @@ Collection of all inputs and outputs from the `main` process.
     - "EPP"
     - "Thermal Expansion"
     - "Elasticity"
-    - "Stress-Strain"
     - "Yield Strength"
     - "Density"
     - "Thermal Conductivity"
@@ -129,6 +124,7 @@ Collection of all inputs and outputs from the `main` process.
     - "Yield Strength"
     - "Ultimate Strength"
     - "EPP Stress-Strain" (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
+- `master_table::DataFrame`: intermediate table of material data created with KM620 equations
 """
 struct ASME_Materials_Data
     user_input::NamedTuple
@@ -136,12 +132,14 @@ struct ASME_Materials_Data
     ASME_groups::Dict{String, String}
     ANSYS_tables::Dict{String, DataFrame}
     ANSYS_figures::Dict{String, Figure}
+    master_table::DataFrame
 end
 Base.show(
     io::IO,
     ::MIME"text/plain",
     x::ASME_Materials_Data
 ) = tprint(io, "{dim}   Output Fields: $(join(fieldnames(typeof(x)),", ")){/dim}")
+export ASME_Materials_Data
 
 # Full Program
 """
@@ -164,7 +162,7 @@ function main(user_input::NamedTuple)
     ASME_tables, ASME_groups = read_ASME_tables(user_input)
 
     tprintln(@style "Transforming input tables ..." cyan italic)
-    ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
+    ANSYS_tables, master_table = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
     tprintln(@style "Writing output tables ..." cyan italic)
     write_ANSYS_tables(ANSYS_tables, user_input)
@@ -180,8 +178,10 @@ function main(user_input::NamedTuple)
         ASME_groups,
         ANSYS_tables,
         ANSYS_figures,
+        master_table,
     )
 end
 main() = main(get_user_input())
+export main
 
 end # module

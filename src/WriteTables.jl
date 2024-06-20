@@ -1,5 +1,9 @@
 """
-    info_table()
+    make_info_table(;
+        num_plastic_points,
+        KM620_coefficients_table_material_category,
+        _...,
+    )
 
 Create an informational table from relevant user inputs.
 """
@@ -27,12 +31,23 @@ function make_info_table(;
     )
     return info_table
 end
+export make_info_table
 
 """
-    write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
+    write_ANSYS_tables(tables, filepath)
+    write_ANSYS_tables(tables, user_input)
 
-Writes ANSYS `tables` to an Excel file.
-Path to output Excel file (including file name) is specified by `filepath`.
+Writes all ANSYS `tables` to an Excel file.
+
+Name and path to output Excel file is specified by `filepath` or within `user_input`.
+
+# Arguments
+- `tables::Dict{String,DataFrame}`:
+- `filepath::String`:
+- `user_input::NamedTuple`: collection of metadata to include in output file from `get_user_input`
+    -`output_file_path`
+    -`num_plastic_points`
+    -`KM620_coefficients_table_material_category`
 """
 function write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
     XLSX.openxlsx(filepath, mode="w") do file
@@ -65,14 +80,6 @@ function write_ANSYS_tables(tables::Dict{String, DataFrame}, filepath::String)
         XLSX.writetable!(sheet, tables["EPP"], anchor_cell=XLSX.CellRef("A4"))
     end
 end
-
-"""
-    write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)
-
-Writes ANSYS `tables` to an Excel file using information specified in `user_input`.
-`output_file_path`, `proportional_limit`, `num_plastic_points`,
-and `KM620_coefficients_table_material_category` must be present in `user_input`.
-"""
 function write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTuple)
     XLSX.openxlsx(user_input.output_file_path, mode="w") do file
         sheet = file[1]
@@ -110,3 +117,4 @@ function write_ANSYS_tables(tables::Dict{String, DataFrame}, user_input::NamedTu
         XLSX.writetable!(sheet, tables["EPP"], anchor_cell=XLSX.CellRef("A4"))
     end
 end
+export write_ANSYS_tables

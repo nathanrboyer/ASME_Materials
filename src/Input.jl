@@ -94,6 +94,7 @@ function get_user_input()
     )
     return user_input
 end
+export user_input
 
 """
     parse_input(type, default)
@@ -111,6 +112,7 @@ function parse_input(type, default)
     end
     return parse(type, input)
 end
+export parse_input
 
 """
     tableKM620_options()
@@ -163,6 +165,7 @@ function make_material_dict(spec_no::String, type_grade::String, class_condition
     )
     return material_dict
 end
+export make_material_dict
 
 """
     save_user_input(user_input::NamedTuple)
@@ -180,3 +183,4 @@ function save_user_input(filepath, user_input)
         end
     end
 end
+export save_user_input

@@ -16,7 +16,7 @@ user_input = (
     )
 )
 ASME_tables, ASME_groups = read_ASME_tables(user_input)
-ANSYS_tables = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
+ANSYS_tables, master_table = transform_ASME_tables(ASME_tables, ASME_groups, user_input)
 
 figures = plot_ANSYS_tables(ANSYS_tables, user_input)
 figures = plot_ANSYS_tables(ANSYS_tables, user_input.material_string, user_input.plot_folder)

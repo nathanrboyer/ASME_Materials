@@ -6,6 +6,7 @@ Read table from given Excel file and sheet name.
 function readtable(filepath::String, sheetname::String)
     DataFrame(XLSX.readtable(filepath, sheetname, first_row = 2, infer_eltypes=true))
 end
+export readtable
 
 """
     findgroup(df::DataFrame, value) -> group::String
@@ -19,13 +20,25 @@ function findgroup(df::DataFrame, value)
         end
     end
 end
+export findgroup
 
 """
-    read_ASME_tables(filepath::String, material_dict::Dict) -> ASME_tables, ASME_groups
+    read_ASME_tables(filepath, material_dict) -> ASME_tables, ASME_groups
+
+Create dictionaries containing all `ASME_tables` and `ASME_groups`
+by reading an input Excel file and filtering it to a specific material.
 
 Make a dictionary of tables and groups read from sheets in the input Excel file
 located at `filepath` using `material_dict` to filter the resulting DataFrame
 to the selected material.
+
+# Arguments
+- `filepath::String`:
+- `material_dict::Dict{}`:
+
+# Returns
+- `ASME_table::Dict{String,DataFrame}`:
+- `ASME_groups::Dict{String,String}`:
 """
 function read_ASME_tables(filepath::String, material_dict::Dict)
 
@@ -75,6 +88,7 @@ function read_ASME_tables(filepath::String, material_dict::Dict)
 
     return tables, groups
 end
+export read_ASME_tables
 
 """
     read_ASME_tables(user_input::NamedTuple) -> ASME_tables, ASME_groups
@@ -126,3 +140,4 @@ function read_ASME_tables(; input_file_path, spec_no, type_grade, class_conditio
     material_dict = make_material_dict(spec_no, type_grade, class_condition_temper)
     read_ASME_tables(filepath::String, material_dict::Dict)
 end
+export read_ASME_tables
