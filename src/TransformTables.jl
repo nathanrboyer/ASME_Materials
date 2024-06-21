@@ -49,7 +49,10 @@ function transform_ASME_tables(
         ANSYS_tables["Hardening $(row.T)°F"] = transform_plasticity(row)
     end
     ANSYS_tables["EPP"] = transform_perfect_plasticity(ANSYS_tables["Yield Strength"])
-
+    ANSYS_tables["EPP Stabilized"] = transform_perfect_plasticity(
+        ANSYS_tables["Yield Strength"],
+        stabilized = true,
+    )
     return ANSYS_tables, master_table
 end
 transform_ASME_tables(
@@ -297,29 +300,62 @@ Allows for calculation of interpolated values between those provided in the tabl
 The input temperatures listed in each table may not match, so interpolation must be used.
 """
 function create_interpolation_functions(ANSYS_tables::Dict)
-    yield_interp = linear_interpolation(
-        ANSYS_tables["Yield Strength"]."Temperature (°F)",
-        ANSYS_tables["Yield Strength"]."Yield Strength (psi)",
-        extrapolation_bc=Line(),
-    )
-    ultimate_interp = linear_interpolation(
-        ANSYS_tables["Ultimate Strength"]."Temperature (°F)",
-        ANSYS_tables["Ultimate Strength"]."Tensile Ultimate Strength (psi)",
-        extrapolation_bc=Line(),
-    )
-    elasticity_interp = linear_interpolation(
-        ANSYS_tables["Elasticity"]."Temperature (°F)",
-        ANSYS_tables["Elasticity"]."Young's Modulus (psi)",
-        extrapolation_bc=Line(),
-    )
-    poisson_interp = linear_interpolation(
-        ANSYS_tables["Elasticity"]."Temperature (°F)",
-        ANSYS_tables["Elasticity"]."Poisson's Ratio",
-        extrapolation_bc=Line(),
-    )
+    yield_interp = create_yield_interp(ANSYS_tables["Yield Strength"])
+    ultimate_interp = create_ultimate_interp(ANSYS_tables["Ultimate Strength"])
+    elasticity_interp = create_elasticity_interp(ANSYS_tables["Elasticity"])
+    poisson_interp = create_poisson_interp(ANSYS_tables["Elasticity"])
     return (; yield_interp, ultimate_interp, elasticity_interp, poisson_interp)
 end
 export create_interpolation_functions
+
+"""
+    create_yield_interp(table)
+
+Create a callable interpolation function from data in the yield strength `table` by temperature.
+"""
+create_yield_interp(table) = linear_interpolation(
+    table."Temperature (°F)",
+    table."Yield Strength (psi)",
+    extrapolation_bc=Line(),
+)
+export create_yield_interp
+
+"""
+    create_ultimate_interp(table)
+
+Create a callable interpolation function from data in the ultimate strength `table` by temperature.
+"""
+create_ultimate_interp(table) = linear_interpolation(
+    table."Temperature (°F)",
+    table."Tensile Ultimate Strength (psi)",
+    extrapolation_bc=Line(),
+)
+export create_ultimate_interp
+
+"""
+    create_elasticity_interp(table)
+
+Create a callable interpolation function from data in the elasticity `table` by temperature.
+"""
+create_elasticity_interp(table) = linear_interpolation(
+    table."Temperature (°F)",
+    table."Young's Modulus (psi)",
+    extrapolation_bc=Line(),
+)
+export create_elasticity_interp
+
+"""
+    create_poisson_interp(table)
+
+Create a callable interpolation function from data in the Poisson `table` by temperature.
+"""
+create_poisson_interp(table) = linear_interpolation(
+    table."Temperature (°F)",
+    table."Poisson's Ratio",
+    extrapolation_bc=Line(),
+)
+export create_poisson_interp
+
 
 """
     create_master_table(ANSYS_tables, user_input)
@@ -436,22 +472,28 @@ transform_plasticity(master_table::DataFrame) = Dict(
 export transform_plasticity
 
 """
-    transform_perfect_plasticity(yield_table)
+    transform_perfect_plasticity(yield_table; stabilized=false)
 
-Create elastic perfectly plastic (EPP) trilinear kinematic hardening tables for ANSYS
+Create elastic perfectly plastic (EPP) multilinear kinematic hardening tables for ANSYS
 from the data in `yield_table`.
 
-A tri-linear material model with the small amount of stabilizing hardening allowed by
+If `stabilized=false` (default when omited),
+a bilinear material model is created, where no hardening is permitted after the yield point.
+The slopes in the two segments are thus (E_y, 0).
+
+If `stabilized=true`,
+a tri-linear material model with the small amount of stabilizing hardening allowed by
 ASME BPVC.VIII.3 KM-610 is used before finally becoming perfectly-plastic with no hardening.
 The hardening is defined by the constants `increase_in_strength` and `increase_in_plastic_strain`.
+The slopes in the three segments are thus (E_y, E_t, 0).
 
-The slopes in the three segments are thus (E_y, E_t, 0),
-where E_y is the slope in the elastic region,
+E_y is the slope in the elastic region,
 E_t is the slope in the stabilized portion of the plastic region,
 and 0 is the slope in the unstabilized portion of the plastic region.
-The second datapont can be deleted to implement a true perfectly plastic material model.
+Note that the slope of the third segment is implicit in how ANSYS treats material hardening
+past the final data point.
 """
-function transform_perfect_plasticity(yield_table)
+function transform_perfect_plasticity(yield_table; stabilized = false)
 
     # Extract data from `yield_table`.
     T = yield_table."Temperature (°F)"      # Temperature Values
@@ -459,31 +501,32 @@ function transform_perfect_plasticity(yield_table)
     N = length(T)                           # Number of Temperature Data Points
 
     # Allocate DataFrame with `missing` values.
+    R = 3  # rows per temperature
     df = DataFrame(
-        "Temperature (°F)" => Vector{Union{Int, Missing}}(missing, 4N),
-        "Plastic Strain (in in^-1)" => Vector{Union{Float64, Missing}}(missing, 4N),
-        "Stress (psi)" => Vector{Union{Float64, Missing}}(missing, 4N)
+        "Temperature (°F)" => Vector{Union{Int, Missing}}(missing, R*N),
+        "Plastic Strain (in in^-1)" => Vector{Union{Float64, Missing}}(missing, R*N),
+        "Stress (psi)" => Vector{Union{Float64, Missing}}(missing, R*N)
     )
 
     # Fill DataFrame with stabilized EPP stress-strain data.
     for i in 1:N
-        # Define Index in Output DataFrame (Four Rows per Temperature)
-        j = 4 * (i - 1) + 1
+        # Define Index in Output DataFrame
+        j = R * (i - 1) + 1
 
-        # First Point
+        # Yield Point
         df[j, "Temperature (°F)"] = T[i]
         df[j, "Plastic Strain (in in^-1)"] = 0.0
         df[j, "Stress (psi)"] = S[i]
 
-        # Second Point
+        # Ultimate Point
         df[j+1, "Plastic Strain (in in^-1)"] = increase_in_plastic_strain
-        df[j+1, "Stress (psi)"] = S[i] * (1 + increase_in_strength)
+        if stabilized
+            df[j+1, "Stress (psi)"] = S[i] * (1 + increase_in_strength)
+        else
+            df[j+1, "Stress (psi)"] = S[i]
+        end
 
-        # Third Point
-        df[j+2, "Plastic Strain (in in^-1)"] = 2 * increase_in_plastic_strain
-        df[j+2, "Stress (psi)"] = S[i] * (1 + increase_in_strength)
-
-        # Blank Fourth Row
+        # Blank Third Row
     end
 
     return df

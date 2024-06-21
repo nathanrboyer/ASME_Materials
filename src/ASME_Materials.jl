@@ -80,8 +80,6 @@ Collection of all inputs and outputs from the `main` process.
     - :class_condition_temper
     - :KM620_coefficients_table_material_category
     - :num_plastic_points
-    - :overwrite_yield
-    - :proportional_limit
     - :input_file_path
     - :output_file_path
     - :output_folder
@@ -107,7 +105,6 @@ Collection of all inputs and outputs from the `main` process.
 - `ANSYS_tables::Dict`: collection of tables which define an ANSYS material;
     output of `transform_ASME_tables` function
     - "Temperature"
-    - "EPP"
     - "Thermal Expansion"
     - "Elasticity"
     - "Yield Strength"
@@ -115,6 +112,8 @@ Collection of all inputs and outputs from the `main` process.
     - "Thermal Conductivity"
     - "Ultimate Strength"
     - "Hardening <Temp>°F"
+    - "EPP"
+    - "EPP Stabilized"
 - `ANSYS_figures::Dict`: collection of figures plotting ANSYS material properties vs. temperature;
     output of `plot_ANSYS_tables` function
     - "Thermal Conductivity"

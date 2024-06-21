@@ -271,29 +271,31 @@ function plot_perfect_plasticity(
         xlabel = "Total Strain (in in^-1)",
         ylabel = "Stress (psi)",
     )
-    elasticity_interp = linear_interpolation(
-        tables["Elasticity"]."Temperature (°F)",
-        tables["Elasticity"]."Young's Modulus (psi)",
-        extrapolation_bc=Line(),
-    )
-    largest_temp = tables["EPP"][end-3,"Temperature (°F)"]
-    for i in 1:Int(nrow(tables["EPP"])/4)
-        j = 4 * (i - 1) + 1
-        temp = tables["EPP"][j, "Temperature (°F)"]
-        yield_stress = tables["EPP"][j, "Stress (psi)"]
-        ultimate_stress = tables["EPP"][j+1, "Stress (psi)"]
-        yield_strain = yield_stress/elasticity_interp(temp) +
-                          tables["EPP"][j, "Plastic Strain (in in^-1)"]
-        ultimate_strain = ultimate_stress/elasticity_interp(temp) +
-                          tables["EPP"][j+1, "Plastic Strain (in in^-1)"]
-        x = [0, yield_strain, ultimate_strain]
-        y = [0, yield_stress, ultimate_stress]
+    elasticity_interp = create_elasticity_interp(tables["Elasticity"])
+    epp_table = tables["EPP Stabilized"]
+    ntemps = epp_table."Temperature (°F)" .|> !ismissing |> count
+    rows_per_temp = Int(nrow(epp_table) / ntemps)
+    max_temp = epp_table[end-rows_per_temp+1,"Temperature (°F)"]
+    for i in 1:ntemps
+        startrow = rows_per_temp * (i - 1) + 1
+        endrow = startrow + rows_per_temp - 1
+        temp = epp_table[startrow, "Temperature (°F)"]
+        stress = vcat(
+            0,
+            epp_table[startrow:endrow, "Stress (psi)"],
+        )
+        plastic_strain = vcat(
+            0,
+            epp_table[startrow:endrow, "Plastic Strain (in in^-1)"],
+        )
+        elastic_strain = stress ./ elasticity_interp(temp)
+        strain = elastic_strain + plastic_strain
         scatterlines!(
             axis,
-            x,
-            y,
+            strain,
+            stress,
             label = "$(temp)°F",
-            color=ColorSchemes.rainbow[temp/largest_temp],
+            color=ColorSchemes.rainbow[temp/max_temp],
         )
     end
     Legend(fig[1,2], axis, "Temperature")
@@ -320,11 +322,6 @@ function plot_total_stress_strain(
         material_string::String,
         output_folder::String=pwd(),
     )
-    elasticity_interp = linear_interpolation(
-        tables["Elasticity"]."Temperature (°F)",
-        tables["Elasticity"]."Young's Modulus (psi)",
-        extrapolation_bc=Line(),
-    ) # need interpolant since elasticity table temperatures may not match hardening tabl
     mkpath(output_folder)
     fig = Figure()
     axis = Axis(
@@ -333,6 +330,7 @@ function plot_total_stress_strain(
         xlabel = "Total Strain (in in^-1)",
         ylabel = "Stress (psi)",
     )
+    elasticity_interp = create_elasticity_interp(tables["Elasticity"])
     temperatures = tables["Temperature"][:,1]
     Tmax = last(temperatures)
     for T in temperatures
