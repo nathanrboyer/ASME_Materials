@@ -3,29 +3,31 @@
     plot_ANSYS_tables(tables, user_input)
 
 Plot ANSYS `tables` and save them to disk.
-Returns a `Dict{String,Figure}` containing the figures below.
+Returns a `LittleDict{String,Figure}` containing the figures below.
 
 # Arguments
-- `tables::Dict{String,DataFrame}`: collection of ANSYS tables to be plotted
+- `tables::LittleDict{String,DataFrame}`: collection of ANSYS tables to be plotted
 - `material_string::String`: used to title the figure "<property> of \$material_string"
 - `output_folder::String = pwd()`: optional path to folder in which to save output figures
 - `user_input::NamedTuple`: collection returned from `get_user_input` function
 
 # Returns
-- `figures::Dict{String,Figure}`: dictionary of figures accessed with the keys below
+- `figures::LittleDict{String,Figure}`:
+    dictionary of figures showing material property changes with temperature;
+    includes the figures below
 
-# Figures
-- Thermal Conductivity
-- Thermal Expansion
-- Elasticity
-- Plasticiy
-- Yield Strength
-- Ultimate Strength
-- EPP Stress-Strain (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
-- Total Stress-Strain
+# Figure Keys
+- `"Thermal Conductivity"`: isotropic thermal conductivity
+- `"Thermal Expansion"`: isotropic instantaneous coefficient of thermal expansion
+- `"Elasticity"`: isotropic elasticity (Young's Modulus)
+- `"Plasticiy"`: plastic stress-strain relationship
+- `"Yield Strength"`: yield strength
+- `"Ultimate Strength"`: ultimate tensile strength
+- `"EPP Stress-Strain"`: elastic perfectly-plastic total stress-strain relationship with stabilization hardening
+- `"Total Stress-Strain"`: total stress-strain relationship
 """
-function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder::String = pwd())
-    figures = Dict(
+function plot_ANSYS_tables(tables::AbstractDict, material_string::String, output_folder::String = pwd())
+    figures = LittleDict(
         "Thermal Conductivity" => plot_thermal_conductivity(tables, material_string, output_folder),
         "Thermal Expansion" => plot_thermal_expansion(tables, material_string, output_folder),
         "Elasticity" => plot_elasticity(tables, material_string, output_folder),
@@ -37,17 +39,17 @@ function plot_ANSYS_tables(tables::Dict, material_string::String, output_folder:
     )
     return figures
 end
-function plot_ANSYS_tables(tables::Dict, user_input::NamedTuple)
+function plot_ANSYS_tables(tables::AbstractDict, user_input::NamedTuple)
     material_string = user_input.material_string
     output_folder = user_input.plot_folder
-    plot_ANSYS_tables(tables::Dict, material_string::String, output_folder::String)
+    plot_ANSYS_tables(tables::AbstractDict, material_string::String, output_folder::String)
 end
 export plot_ANSYS_tables
 
 
 """
     plot_thermal_conductivity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String = pwd(),
     )
@@ -55,7 +57,7 @@ export plot_ANSYS_tables
 Plot isotropic thermal conductivity.
 """
 function plot_thermal_conductivity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String = pwd(),
     )
@@ -80,7 +82,7 @@ export plot_thermal_conductivity
 
 """
     plot_thermal_expansion(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -88,7 +90,7 @@ export plot_thermal_conductivity
 Plot isotropic instantaneous coefficient of thermal expansion.
 """
 function plot_thermal_expansion(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -113,7 +115,7 @@ export plot_thermal_expansion
 
 """
     plot_elasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -121,7 +123,7 @@ export plot_thermal_expansion
 Plot isotropic elasticity.
 """
 function plot_elasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -147,7 +149,7 @@ export plot_elasticity
 
 """
     plot_plasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -155,7 +157,7 @@ export plot_elasticity
 Plot plastic stress-strain relationship.
 """
 function plot_plasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -185,7 +187,7 @@ export plot_plasticity
 
 """
     plot_yield_strength(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -193,7 +195,7 @@ export plot_plasticity
 Plot yield strength.
 """
 function plot_yield_strength(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -218,7 +220,7 @@ export plot_yield_strength
 
 """
     plot_ultimate_strength(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -226,7 +228,7 @@ export plot_yield_strength
 Plot ultimate tensile strength.
 """
 function plot_ultimate_strength(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -251,7 +253,7 @@ export plot_ultimate_strength
 
 """
     plot_perfect_plasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -259,7 +261,7 @@ export plot_ultimate_strength
 Plot elastic perfectly plastic stress-strain relationship.
 """
 function plot_perfect_plasticity(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -307,7 +309,7 @@ export plot_perfect_plasticity
 
 """
     plot_total_stress_strain(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )
@@ -318,7 +320,7 @@ Adds the origin and elastic strain data into the hardening tables.
 Then plots total strain vs. stress.
 """
 function plot_total_stress_strain(
-        tables::Dict,
+        tables::AbstractDict,
         material_string::String,
         output_folder::String=pwd(),
     )

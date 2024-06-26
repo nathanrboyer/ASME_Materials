@@ -9,7 +9,7 @@ user_input = (
     output_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels",
     plot_folder = "S:\\Material Properties\\Excel Material Data\\Q&T Steels\\Plots",
     material_string = "SA-723-3-2a",
-    material_dict = Dict(
+    material_dict = LittleDict(
         "Spec. No." => x -> x .== "SA-723",
         "Type/Grade" => x -> x .== "3",
         "Class/Condition/Temper" => x -> x .== "2a",

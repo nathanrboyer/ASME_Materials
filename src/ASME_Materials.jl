@@ -1,7 +1,8 @@
 module ASME_Materials
 
 # Load Packages
-using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, SimpleNonlinearSolve, Term, XLSX
+using ColorSchemes, DataFrames, GLMakie, Interpolations, NativeFileDialog, OrderedCollections,
+        SimpleNonlinearSolve, Term, XLSX
 import KM620
 
 # Define Functions
@@ -82,55 +83,57 @@ Collection of all inputs and outputs from the `main` process.
     - :num_plastic_points
     - :input_file_path
     - :output_file_path
-    - :output_folder
     - :plot_folder
     - :material_string
     - :material_dict
-- `ASME_tables::Dict`: collection of tables read from the `read_ASME_tables` function
-    - "Y"
-    - "TCDkey"
-    - "U"
+- `ASME_tables::LittleDict`: collection of tables defined by ASME Section II-D;
+    output from the `read_ASME_tables` function
     - "PRD"
-    - "TE"
     - "PRDkey"
-    - "TMkey"
     - "TCD"
+    - "TCDkey"
+    - "TE"
     - "TEkey"
     - "TM"
-- `ASME_groups::Dict`: collection of table groups read from the `read_ASME_tables` function
-    - "TE"
+    - "TMkey"
+    - "U"
+    - "Y"
+- `ASME_groups::LittleDict`: collection of material groups defined by ASME Section II-D;
+    output from the `read_ASME_tables` function
     - "PRD"
     - "TCD"
+    - "TE"
     - "TM"
-- `ANSYS_tables::Dict`: collection of tables which define an ANSYS material;
+- `ANSYS_tables::LittleDict`: collection of tables which define an ANSYS material;
     output of `transform_ASME_tables` function
-    - "Temperature"
+    - "Density"
+    - "Thermal Conductivity"
     - "Thermal Expansion"
     - "Elasticity"
     - "Yield Strength"
-    - "Density"
-    - "Thermal Conductivity"
     - "Ultimate Strength"
+    - "Temperature"
     - "Hardening <Temp>°F"
     - "EPP"
     - "EPP Stabilized"
-- `ANSYS_figures::Dict`: collection of figures plotting ANSYS material properties vs. temperature;
+- `ANSYS_figures::LittleDict`: collection of figures plotting ANSYS material properties vs. temperature;
     output of `plot_ANSYS_tables` function
     - "Thermal Conductivity"
     - "Thermal Expansion"
     - "Elasticity"
-    - "Stress-Strain"
+    - "Plasticity"
     - "Yield Strength"
     - "Ultimate Strength"
-    - "EPP Stress-Strain" (Elastic Perfectly-Plastic Stress-Strain Curves with Allowed Stabilization)
-- `master_table::DataFrame`: intermediate table of material data created with KM620 equations
+    - "EPP Stress-Strain"
+    - "Total Stress-Strain"
+- `master_table::DataFrame`: intermediate table of material data created using the KM-620 equations
 """
 struct ASME_Materials_Data
     user_input::NamedTuple
-    ASME_tables::Dict{String, DataFrame}
-    ASME_groups::Dict{String, String}
-    ANSYS_tables::Dict{String, DataFrame}
-    ANSYS_figures::Dict{String, Figure}
+    ASME_tables::LittleDict{String, DataFrame}
+    ASME_groups::LittleDict{String, String}
+    ANSYS_tables::LittleDict{String, DataFrame}
+    ANSYS_figures::LittleDict{String, Figure}
     master_table::DataFrame
 end
 Base.show(

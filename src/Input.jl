@@ -2,6 +2,18 @@
     get_user_input()
 
 Gather user input required to perform the table transformation into a named tuple.
+
+# Fields
+- `:spec_no`: material specification number from Section II-D
+- `:type_grade`: material type or grade from Section II-D
+- `:class_condition_temper`: material class, condition, or temper from Section II-D
+- `:KM620_coefficients_table_material_category`: material category from Div. 3 Table KM-620
+- `:num_plastic_points`: number of stress-strain points to compute on the plastic region for ANSYS
+- `:input_file_path`: path to input Excel file `Section II-D Tables.xlsx`
+- `:output_file_path`: path to output Excel file `<material_string>.xlsx`
+- `:plot_folder`: path to folder in which to save output plots
+- `:material_string`: string combining the `spec_no`, `type_grade`, and `class_condition_temper` with hyphens
+- `:material_dict`: dictionary of functions used to filter ASME_tables
 """
 function get_user_input()
     # Material Specification
@@ -87,7 +99,6 @@ function get_user_input()
         num_plastic_points,
         input_file_path,
         output_file_path,
-        output_folder,
         plot_folder,
         material_string,
         material_dict,
@@ -151,14 +162,14 @@ end
         spec_no::String,
         type_grade::String,
         class_condition_temper::String
-    ) -> material_dict::Dict{String, Function}
+    ) -> material_dict::LittleDict{String, Function}
 
 Create dictionary to filter DataFrame material properties from material specifications.
 
 Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
 """
 function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
-    material_dict = Dict(
+    material_dict = LittleDict{String, Function}(
         "Spec. No." => x -> x .== spec_no,
         "Type/Grade" => x -> x .== type_grade,
         "Class/Condition/Temper" => x -> x .== class_condition_temper,

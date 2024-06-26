@@ -5,12 +5,12 @@
 Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and material information.
 
 # Arguments
-- `ASME_tables::Dict{String, DataFrame}`: tables from `read_ASME_tables` function
-- `ASME_groups::Dict{String, String}`: groups from `read_ASME_tables` function
+- `ASME_tables::LittleDict{String, DataFrame}`: tables from `read_ASME_tables` function
+- `ASME_groups::LittleDict{String, String}`: groups from `read_ASME_tables` function
 - `user_input::NamedTuple`: collection of keyword arguments from `get_user_input` function
 
 # Keyword Arguments (Required)
-- `material_dict::Dict`:
+- `material_dict::LittleDict`:
     dictionary for material DataFrame filtering from `make_material_dict` function.
 
 - `KM620_coefficients_table_material_category::String`:
@@ -20,19 +20,31 @@ Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and materia
    number of evenly-spaced stress-strain points to compute between yield and ultimate stress.
 
 # Returns
-- `ANSYS_tables::Dict{String, DataFrame}`: collection of tables for defining an ANSYS material
+- `ANSYS_tables::LittleDict{String, DataFrame}`: collection of tables for defining an ANSYS material;
+        contains the tables below
 
+# Table Keys
+- `"Density"`: density
+- `"Thermal Conductivity"`: isotropic thermal conductivity
+- `"Thermal Expansion"`: isotropic instantaneous coefficient of thermal expansion
+- `"Elasticity"`: isotropic elasticity (Young's Modulus)
+- `"Yield Strength"`: yield strength
+- `"Ultimate Strength"`: ultimate tensile strength
+- `"Temperature"`: temperature values on which to compute hardening curves
+- `"Hardening <Temp>°F"`: plastic stress-strain relationship for the indicated temperature
+- `"EPP"`: elastic perfectly-plastic plastic stress-strain relationship for all temperatures
+- `"EPP Stabilized"`: `"EPP"` but with a small amount of stabilization hardening allowed by KM-610
 """
 function transform_ASME_tables(
-    ASME_tables::Dict{String, DataFrame}, ASME_groups::Dict{String, String};
-    material_dict::Dict,
+    ASME_tables::LittleDict{String, DataFrame}, ASME_groups::LittleDict{String, String};
+    material_dict::LittleDict,
     KM620_coefficients_table_material_category::String,
     num_plastic_points::Int,
     _...,  # _... picks up any extra arguments
     )
 
     ν, ρ = read_PRD(ASME_tables, ASME_groups)  # read constants
-    ANSYS_tables = Dict{String, DataFrame}()   # create output table dictionary
+    ANSYS_tables = LittleDict{String, DataFrame}()   # create output table dictionary
     ANSYS_tables["Density"] = transform_density(ρ)
     ANSYS_tables["Thermal Conductivity"] = transform_thermal_conductivity(ASME_tables)
     ANSYS_tables["Thermal Expansion"] = transform_thermal_expansion(ASME_tables)
@@ -56,12 +68,12 @@ function transform_ASME_tables(
     return ANSYS_tables, master_table
 end
 transform_ASME_tables(
-    ASME_tables::Dict{String,DataFrame},
-    ASME_groups::Dict{String,String},
+    ASME_tables::LittleDict{String,DataFrame},
+    ASME_groups::LittleDict{String,String},
     user_input::NamedTuple
 ) = transform_ASME_tables(
-    ASME_tables::Dict{String,DataFrame},
-    ASME_groups::Dict{String,String};
+    ASME_tables::LittleDict{String,DataFrame},
+    ASME_groups::LittleDict{String,String};
     user_input..., # Splat user_input into keyword arguments.
 ) # allows `user_input` to be passed without splatting it into keyword arguments
 export transform_ASME_tables
@@ -86,19 +98,19 @@ end
 export get_numeric_headers
 
 """
-    get_row_data(table::DataFrame, conditions::Dict) -> row_data::Vector
-    get_row_data(table::DataFrame, conditions::Dict, returncolumns) -> row_data::Vector
+    get_row_data(table::DataFrame, conditions::LittleDict) -> row_data::Vector
+    get_row_data(table::DataFrame, conditions::LittleDict, returncolumns) -> row_data::Vector
 
 Returns the `table` row that meets all the provided `conditions`.
-`conditions` is a `Dict` which maps column names to filtering functions
-e.g. Dict("Column Name" => (x -> x .== cellvalue)).
+`conditions` is a `LittleDict` which maps column names to filtering functions
+e.g. LittleDict("Column Name" => (x -> x .== cellvalue)).
 `returncolumns` can optionally be provided to return only certain columns of the DataFrame.
 `returncolumns` may be a single column index or a vector of column indices.
 """
-function get_row_data(table::DataFrame, conditions::Dict, returncolumns)
+function get_row_data(table::DataFrame, conditions::LittleDict, returncolumns)
     subset(table, conditions...)[:,string.(returncolumns)] |> only |> Vector
 end
-get_row_data(table::DataFrame, conditions::Dict) = subset(table, conditions...) |> only |> Vector
+get_row_data(table::DataFrame, conditions::LittleDict) = subset(table, conditions...) |> only |> Vector
 export get_row_data
 
 """
@@ -213,7 +225,7 @@ function transform_elasticity(ASME_tables, ASME_groups, ν)
         "Temperature (°F)" => get_numeric_headers(ASME_tables["TM"]),
         "Young's Modulus (psi)" => get_row_data(
             ASME_tables["TM"],
-            Dict("Materials" => x -> x .== ASME_groups["TM"]),
+            LittleDict("Materials" => x -> x .== ASME_groups["TM"]),
             get_numeric_headers(ASME_tables["TM"])
         ) .* 10^6,
         "Poisson's Ratio" => fill(ν, ncol(ASME_tables["TM"]) - 1)
@@ -280,14 +292,14 @@ function transform_temperature(yield_table, ultimate_table)
     ) |> sort!
     select!(df, 1)
 end
-transform_temperature(ANSYS_tables::Dict) = transform_temperature(
+transform_temperature(ANSYS_tables::LittleDict) = transform_temperature(
     ANSYS_tables["Yield Strength"],
     ANSYS_tables["Ultimate Strength"],
 )
 export transform_temperature
 
 """
-    create_interpolation_functions(ANSYS_tables::Dict)
+    create_interpolation_functions(ANSYS_tables::LittleDict)
 
 Creates the interpolation functions required for the `create_master_table` function
 and returns them in a `NamedTuple`.
@@ -299,7 +311,7 @@ Allows for calculation of interpolated values between those provided in the tabl
 
 The input temperatures listed in each table may not match, so interpolation must be used.
 """
-function create_interpolation_functions(ANSYS_tables::Dict)
+function create_interpolation_functions(ANSYS_tables::LittleDict)
     yield_interp = create_yield_interp(ANSYS_tables["Yield Strength"])
     ultimate_interp = create_ultimate_interp(ANSYS_tables["Ultimate Strength"])
     elasticity_interp = create_elasticity_interp(ANSYS_tables["Elasticity"])
@@ -372,7 +384,7 @@ Output is a `DataFrame` containing all calculated quantites.
 Some cells contain vector quantites and some contain scalar quantities.
 
 # Arguments
-- `ANSYS_tables::Dict{String, DataFrame}`:
+- `ANSYS_tables::LittleDict{String, DataFrame}`:
     collection of tables to define ANSYS material model
 - `material_category::AbstractString`:
     `KM620_coefficients_table_material_category` from `get_user_input`
@@ -431,7 +443,7 @@ function create_master_table(
     return df
 end
 create_master_table(
-    ANSYS_tables::Dict,
+    ANSYS_tables::LittleDict,
     material_category::AbstractString,
     num_plastic_points::Int,
 ) = create_master_table(
@@ -451,7 +463,7 @@ Create multilinear kinematic hardening tables for ANSYS from the data in `master
 If a single row from `master_table` is passed,
 then a single hardening table `DataFrame` is returned for the temperature value defined in the row.
 If the entire `master_table` is passed,
-then a `Dict{String,DataFrame}` containing the hardening tables for every temperature is returned.
+then a `LittleDict{String,DataFrame}` containing the hardening tables for every temperature is returned.
 
 The first plastic data point (at the proportional limit) is shifted
 according to KM-620.2 such that the total plastic strain there is identically zero.
@@ -466,7 +478,7 @@ function transform_plasticity(row::DataFrameRow)
         "Stress (psi)" => stress,
     )
 end
-transform_plasticity(master_table::DataFrame) = Dict(
+transform_plasticity(master_table::DataFrame) = LittleDict(
     "Hardening $(row.T)°F" => transform_plasticity(row) for row in eachrow(master_table)
 )
 export transform_plasticity
