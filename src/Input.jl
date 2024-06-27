@@ -105,7 +105,7 @@ function get_user_input()
     )
     return user_input
 end
-export user_input
+export get_user_input
 
 """
     parse_input(type, default)

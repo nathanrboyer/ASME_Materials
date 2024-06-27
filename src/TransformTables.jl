@@ -127,12 +127,12 @@ This is done by finding the root of the function `KM620.plasticity` with Nonline
     - rows: material temperature
     - columns: material parameters
 - `searchrange::Tuple{T, T} where T<:Number`: optional argument to change the search range for `σ_p`.
-    Defaults to `(1.0, 1e6)`.
+    Defaults to `(1e1, 1e6)`.
 
 # Results
 - `σ_p::Vector{Float64}`: stress values at the proportional limit for each input material temperature
 """
-function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1.0, 1e6))
+function find_proportional_limit(table::DataFrame, searchrange::Tuple=(1e1, 1e6))
     @assert(
         (length(searchrange) == 2) && (typeof(first(searchrange)) == typeof(last(searchrange))),
         "`searchrange` must be a `Tuple{T,T} where T<:Number` (two elements of the same type)"
@@ -422,8 +422,8 @@ function create_master_table(
     df.A_1 = KM620.A_1.(df.σ_ys, df.ϵ_ys, df.m_1)
     df.A_2 = KM620.A_2.(df.σ_uts, df.m_2)
     df.σ_utst = KM620.σ_utst.(df.σ_uts, df.m_2)
-    # df.σ_p = find_proportional_limit(df)  # FIX THIS
-    df.σ_p = df.σ_ys                        # DELETE THIS
+    # df.σ_p = find_proportional_limit(df) # FIX THIS
+    df.σ_p = df.σ_ys                       # DELETE THIS
 
     # KM-620 Vector Quantities
     rowiterator = 1:nrow(df)
