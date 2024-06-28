@@ -85,7 +85,7 @@ function get_user_input()
     output_folder = pick_folder(dirname(input_file_path))
 
     # Derived Quantities
-    material_string = string(spec_no,'-',type_grade,'-',class_condition_temper)
+    material_string = make_material_string(spec_no, type_grade, class_condition_temper)
     material_dict = make_material_dict(spec_no, type_grade, class_condition_temper)
     output_file_path = joinpath(output_folder, material_string*".xlsx")
     plot_folder = joinpath(output_folder, "Plots")
@@ -158,21 +158,33 @@ function tableKM620_options()
 end
 
 """
+    make_material_string(spec_no, type_grade, class_condition_temper)
+
+Combine the material designations into a single hyphen-separated string.
+"""
+make_material_string(
+    spec_no,
+    type_grade,
+    class_condition_temper,
+) = string(spec_no,'-',type_grade,'-',class_condition_temper)
+export make_material_string
+
+"""
     make_material_dict(
         spec_no::String,
         type_grade::String,
         class_condition_temper::String
-    ) -> material_dict::LittleDict{String, Function}
+    ) -> material_dict::LittleDict{String, String}
 
 Create dictionary to filter DataFrame material properties from material specifications.
 
-Maps the Section II-D table header string to an anonymous function `x -> x .== input_value`.
+Maps the Section II-D table header string to an anonymous function `input_value`.
 """
 function make_material_dict(spec_no::String, type_grade::String, class_condition_temper::String)
-    material_dict = LittleDict{String, Function}(
-        "Spec. No." => x -> x .== spec_no,
-        "Type/Grade" => x -> x .== type_grade,
-        "Class/Condition/Temper" => x -> x .== class_condition_temper,
+    material_dict = LittleDict{String, String}(
+        "Spec. No." => spec_no,
+        "Type/Grade" => type_grade,
+        "Class/Condition/Temper" => class_condition_temper,
     )
     return material_dict
 end

@@ -4,6 +4,12 @@ Code to convert American Society of Mechanical Engineers (ASME) Boiler and Press
 ## Julia Language Installation
 The Julia programming language can be installed for free from your operating system's native store (Microsoft Store, Mac App Store, Ubuntu Software Center, etc.). Just search for `Julia`.
 
+## Prerequisites
+The KM620.jl package must be installed from GitHub before this package can be installed.
+It defines the Division 3 equations required to transform the data.
+Please download and install it first.
+https://github.com/nathanrboyer/KM620.jl
+
 ## Package Installation
 1. Download and extract this package from Github with any available method.
    (This might already be done.)

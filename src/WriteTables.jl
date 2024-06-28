@@ -9,7 +9,7 @@ Name and path to output Excel file is specified by `filepath` or within `user_in
 Additional input data is written to file if `user_input` is provided using `make_info_table`.
 
 # Arguments
-- `tables::LittleDict{String, DataFrame}`: dictionary of ANSYS tables to be written to file
+- `tables::AbstractDict{String, DataFrame}`: dictionary of ANSYS tables to be written to file
 - `filepath::AbstractString`: location to save file including file name
 - `user_input::NamedTuple`: collection of metadata to include in output file from `get_user_input`
     -`output_file_path`
@@ -17,7 +17,7 @@ Additional input data is written to file if `user_input` is provided using `make
     -`KM620_coefficients_table_material_category`
 """
 function write_ANSYS_tables(
-        tables::LittleDict{String, DataFrame},
+        tables::AbstractDict{String, DataFrame},
         filepath::AbstractString,
         user_input::Union{Nothing, NamedTuple} = nothing,
     )
@@ -62,7 +62,7 @@ function write_ANSYS_tables(
     end
 end
 write_ANSYS_tables(
-    tables::LittleDict{String, DataFrame},
+    tables::AbstractDict{String, DataFrame},
     user_input::NamedTuple
 ) = write_ANSYS_tables(
     tables,

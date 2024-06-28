@@ -1,6 +1,7 @@
 """
-    plot_ANSYS_tables(tables, material_string, output_folder)
     plot_ANSYS_tables(tables, user_input)
+    plot_ANSYS_tables(tables, material_string)
+    plot_ANSYS_tables(tables, material_string, output_folder)
 
 Plot ANSYS `tables` and save them to disk.
 Returns a `LittleDict{String,Figure}` containing the figures below.

@@ -5,12 +5,12 @@
 Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and material information.
 
 # Arguments
-- `ASME_tables::LittleDict{String, DataFrame}`: tables from `read_ASME_tables` function
-- `ASME_groups::LittleDict{String, String}`: groups from `read_ASME_tables` function
+- `ASME_tables::AbstractDict{String, DataFrame}`: tables from `read_ASME_tables` function
+- `ASME_groups::AbstractDict{String, String}`: groups from `read_ASME_tables` function
 - `user_input::NamedTuple`: collection of keyword arguments from `get_user_input` function
 
 # Keyword Arguments (Required)
-- `material_dict::LittleDict`:
+- `material_dict::AbstractDict`:
     dictionary for material DataFrame filtering from `make_material_dict` function.
 
 - `KM620_coefficients_table_material_category::String`:
@@ -36,8 +36,8 @@ Create new tables in ANSYS format from `ASME_tables`, `ASME_groups`, and materia
 - `"EPP Stabilized"`: `"EPP"` but with a small amount of stabilization hardening allowed by KM-610
 """
 function transform_ASME_tables(
-    ASME_tables::LittleDict{String, DataFrame}, ASME_groups::LittleDict{String, String};
-    material_dict::LittleDict,
+    ASME_tables::AbstractDict{String, DataFrame}, ASME_groups::AbstractDict{String, String};
+    material_dict::AbstractDict,
     KM620_coefficients_table_material_category::String,
     num_plastic_points::Int,
     _...,  # _... picks up any extra arguments
@@ -68,12 +68,12 @@ function transform_ASME_tables(
     return ANSYS_tables, master_table
 end
 transform_ASME_tables(
-    ASME_tables::LittleDict{String,DataFrame},
-    ASME_groups::LittleDict{String,String},
+    ASME_tables::AbstractDict{String,DataFrame},
+    ASME_groups::AbstractDict{String,String},
     user_input::NamedTuple
 ) = transform_ASME_tables(
-    ASME_tables::LittleDict{String,DataFrame},
-    ASME_groups::LittleDict{String,String};
+    ASME_tables,
+    ASME_groups;
     user_input..., # Splat user_input into keyword arguments.
 ) # allows `user_input` to be passed without splatting it into keyword arguments
 export transform_ASME_tables
@@ -98,19 +98,64 @@ end
 export get_numeric_headers
 
 """
-    get_row_data(table::DataFrame, conditions::LittleDict) -> row_data::Vector
-    get_row_data(table::DataFrame, conditions::LittleDict, returncolumns) -> row_data::Vector
+    get_row_data(table, conditions) -> row
+    get_row_data(table, conditions, returncolumns) -> row
+    get_row_data(table, conditions, returncolumn) -> value
 
-Returns the `table` row that meets all the provided `conditions`.
-`conditions` is a `LittleDict` which maps column names to filtering functions
-e.g. LittleDict("Column Name" => (x -> x .== cellvalue)).
-`returncolumns` can optionally be provided to return only certain columns of the DataFrame.
-`returncolumns` may be a single column index or a vector of column indices.
+Returns the `table` row that meets all the provided `conditions`,
+optionally filtered to only `returncolumns`.
+
+# Arguments
+- `table::DataFrame`: a table of data
+- `conditions::AbstractDict`: a dictionary mapping column names to column values
+- `returncolumns::AbstractVector`: list of columns to include in the returned DataFrameRow
+- `returncolumn::Union{AbstractString, Symbol, Int}`: single column value to include in the returned DataFrameRow
+
+# Returns
+- `row::DataFrameRow`: the row data from the filtered `table`
+- `value::Any`: the cell data from the filtered `table`
+
+# Examples
+```julia
+julia> using DataFrames
+
+julia> table = DataFrame(
+           first_name = ["John", "John", "Sarah"],
+           last_name = ["Smith", "Glenn", "Jones"],
+           age = [24, 37, 18],
+       )
+3×3 DataFrame
+ Row │ first_name  last_name  age
+     │ String      String     Int64
+─────┼──────────────────────────────
+   1 │ John        Smith         24
+   2 │ John        Glenn         37
+   3 │ Sarah       Jones         18
+
+julia> conditions = Dict(:first_name => "John", :last_name => "Glenn")
+Dict{Symbol, String} with 2 entries:
+  :last_name  => "Glenn"
+  :first_name => "John"
+
+julia> get_row_data(table, conditions)
+DataFrameRow
+ Row │ first_name  last_name  age
+     │ String      String     Int64
+─────┼──────────────────────────────
+   2 │ John        Glenn         37
+
+julia> get_row_data(table, conditions, :age)
+37
+```
 """
-function get_row_data(table::DataFrame, conditions::LittleDict, returncolumns)
-    subset(table, conditions...)[:,string.(returncolumns)] |> only |> Vector
+function get_row_data(table::DataFrame, conditions::AbstractDict)
+    grouped_table = groupby(table, collect(keys(conditions)))
+    grouped_table[conditions] |> only
+
 end
-get_row_data(table::DataFrame, conditions::LittleDict) = subset(table, conditions...) |> only |> Vector
+function get_row_data(table::DataFrame, conditions::AbstractDict, returncolumns)
+    get_row_data(table, conditions)[string.(returncolumns)]
+end
 export get_row_data
 
 """
@@ -221,13 +266,15 @@ Uses Section II-D Table TM-1 and Table PRD to provide ANSYS with the material
 isotropic modulus of elasticity in psi and non-dimensional Poisson's ratio.
 """
 function transform_elasticity(ASME_tables, ASME_groups, ν)
+    temperatures = get_numeric_headers(ASME_tables["TM"])
+    moduli  = get_row_data(
+        ASME_tables["TM"],
+        LittleDict("Materials" => ASME_groups["TM"]),
+        temperatures
+    ) |> collect
     DataFrame(
-        "Temperature (°F)" => get_numeric_headers(ASME_tables["TM"]),
-        "Young's Modulus (psi)" => get_row_data(
-            ASME_tables["TM"],
-            LittleDict("Materials" => x -> x .== ASME_groups["TM"]),
-            get_numeric_headers(ASME_tables["TM"])
-        ) .* 10^6,
+        "Temperature (°F)" => temperatures,
+        "Young's Modulus (psi)" => moduli .* 10^6,  # convert to psi
         "Poisson's Ratio" => fill(ν, ncol(ASME_tables["TM"]) - 1)
     ) |> dropmissing
 end
@@ -246,10 +293,10 @@ function transform_yield(ASME_tables, material_dict)
         ASME_tables["Y"],
         material_dict,
         yield_temps
-    ) .* 1000  # convert to psi
+    ) |> collect
     DataFrame(
         "Temperature (°F)" => yield_temps,
-        "Yield Strength (psi)" => yield_data,
+        "Yield Strength (psi)" => yield_data .* 1000,  # convert to psi
     ) |> dropmissing
 end
 export transform_yield
@@ -267,10 +314,10 @@ function transform_ultimate(ASME_tables, material_dict)
         ASME_tables["U"],
         material_dict,
         ultimate_temps
-    ) .* 1000  # convert to psi
+    ) |> collect
     DataFrame(
         "Temperature (°F)" => ultimate_temps,
-        "Tensile Ultimate Strength (psi)" => ultimate_data,
+        "Tensile Ultimate Strength (psi)" => ultimate_data .* 1000,  # convert to psi
     ) |> dropmissing
 end
 export transform_ultimate
@@ -292,14 +339,14 @@ function transform_temperature(yield_table, ultimate_table)
     ) |> sort!
     select!(df, 1)
 end
-transform_temperature(ANSYS_tables::LittleDict) = transform_temperature(
+transform_temperature(ANSYS_tables::AbstractDict) = transform_temperature(
     ANSYS_tables["Yield Strength"],
     ANSYS_tables["Ultimate Strength"],
 )
 export transform_temperature
 
 """
-    create_interpolation_functions(ANSYS_tables::LittleDict)
+    create_interpolation_functions(ANSYS_tables::AbstractDict)
 
 Creates the interpolation functions required for the `create_master_table` function
 and returns them in a `NamedTuple`.
@@ -311,7 +358,7 @@ Allows for calculation of interpolated values between those provided in the tabl
 
 The input temperatures listed in each table may not match, so interpolation must be used.
 """
-function create_interpolation_functions(ANSYS_tables::LittleDict)
+function create_interpolation_functions(ANSYS_tables::AbstractDict)
     yield_interp = create_yield_interp(ANSYS_tables["Yield Strength"])
     ultimate_interp = create_ultimate_interp(ANSYS_tables["Ultimate Strength"])
     elasticity_interp = create_elasticity_interp(ANSYS_tables["Elasticity"])
@@ -384,7 +431,7 @@ Output is a `DataFrame` containing all calculated quantites.
 Some cells contain vector quantites and some contain scalar quantities.
 
 # Arguments
-- `ANSYS_tables::LittleDict{String, DataFrame}`:
+- `ANSYS_tables::AbstractDict{String, DataFrame}`:
     collection of tables to define ANSYS material model
 - `material_category::AbstractString`:
     `KM620_coefficients_table_material_category` from `get_user_input`
@@ -443,7 +490,7 @@ function create_master_table(
     return df
 end
 create_master_table(
-    ANSYS_tables::LittleDict,
+    ANSYS_tables::AbstractDict,
     material_category::AbstractString,
     num_plastic_points::Int,
 ) = create_master_table(

@@ -36,10 +36,10 @@ Returned table keys match the table names in Section II-D.
 # Arguments
 - `user_input::NamedTuple`: output from the `get_user_input` function
 - `filepath::String`: location of the input Excel file "Section II-D Tables.xlsx"
-- `material_dict::LittleDict{String,Function}`: output from the `make_material_dict` function
+- `material_dict::LittleDict{String,String}`: output from the `make_material_dict` function
 - `spec_no::String`: material specification number from Section II-D
 - `type_grade::String`: material type or grade from Section II-D
-- `class_condition_temper`: material class, condition, or temper from Section II-D
+- `class_condition_temper::String`: material class, condition, or temper from Section II-D
 
 # Returns
 - `ASME_table::LittleDict{String,DataFrame}`:
@@ -108,8 +108,10 @@ function read_ASME_tables(filepath::String, material_dict::AbstractDict)
     end
 
     # Find Chemical Composition
-    nomcomp = subset(tables["Y"], material_dict...)."Nominal Composition" |> only
-    alloy = subset(tables["Y"], material_dict...)."Alloy Desig./UNS No." |> only
+    grouped_table = groupby(tables["Y"], collect(keys(material_dict)))
+    grouped_table_row = grouped_table[material_dict] |> only
+    nomcomp = grouped_table_row."Nominal Composition"
+    alloy = grouped_table_row."Alloy Desig./UNS No."
     groups = LittleDict{String, String}()
     if nomcomp == "Carbon steel"  # Carbon steel has two different groups in table TM, so must categorize by alloy designation instead.
         groups["TM"] = findgroup(tables["TMkey"], alloy)
