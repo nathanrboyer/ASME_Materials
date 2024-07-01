@@ -469,8 +469,7 @@ function create_master_table(
     df.A_1 = KM620.A_1.(df.σ_ys, df.ϵ_ys, df.m_1)
     df.A_2 = KM620.A_2.(df.σ_uts, df.m_2)
     df.σ_utst = KM620.σ_utst.(df.σ_uts, df.m_2)
-    # df.σ_p = find_proportional_limit(df) # FIX THIS
-    df.σ_p = df.σ_ys                       # DELETE THIS
+    df.σ_p = find_proportional_limit(df)
 
     # KM-620 Vector Quantities
     rowiterator = 1:nrow(df)
