@@ -25,3 +25,6 @@ OrderedCollections = "1.6"
 SimpleNonlinearSolve = "1.6"
 Term = "1 - 2"
 XLSX = "0.8 - 0.10"
+
+[sources]
+KM620 = {url = "https://github.com/nathanrboyer/KM620.jl"}
